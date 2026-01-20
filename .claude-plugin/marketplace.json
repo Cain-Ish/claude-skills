@@ -1,41 +1,31 @@
 {
-  "name": "claude-skills-marketplace",
-  "version": "1.0.0",
-  "description": "Collection of Claude Code plugins for enhanced AI-assisted development",
-  "author": "Claude Skills",
-  "homepage": "https://github.com/Cain-Ish/claude-skills",
+  "name": "claude-skills",
+  "owner": {
+    "name": "Cain-Ish"
+  },
+  "metadata": {
+    "description": "Collection of Claude Code plugins for enhanced AI-assisted development",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
       "name": "reflect",
-      "path": "plugins/reflect",
+      "source": "./plugins/reflect",
       "version": "1.0.0",
-      "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals (corrections, successes, edge cases), proposes skill enhancements with confidence levels, validates proposals via critic agent against 12-factor principles, and tracks effectiveness metrics over time.",
-      "author": "Claude Skills",
-      "tags": [
+      "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals, proposes skill enhancements, validates via critic agent, and tracks effectiveness metrics.",
+      "author": {
+        "name": "Cain-Ish"
+      },
+      "repository": "https://github.com/Cain-Ish/claude-skills",
+      "license": "MIT",
+      "keywords": [
         "self-improvement",
         "learning",
         "skills",
         "metrics",
-        "reflection",
-        "12-factor-agent"
+        "reflection"
       ],
-      "platforms": ["darwin", "linux", "win32"],
-      "featured": true,
-      "commands": ["/reflect"],
-      "hooks": ["PreToolUse", "Stop"],
-      "agents": ["reflect-critic"]
-    }
-  ],
-  "categories": [
-    {
-      "name": "Development",
-      "description": "Plugins that enhance the development workflow",
-      "plugins": ["reflect"]
-    },
-    {
-      "name": "Self-Improvement",
-      "description": "Plugins that help Claude learn and improve",
-      "plugins": ["reflect"]
+      "category": "development"
     }
   ]
 }
