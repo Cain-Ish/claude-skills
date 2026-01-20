@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "reflect",
+      "name": "cainish",
       "source": "./plugins/reflect",
       "version": "1.0.0",
       "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals, proposes skill enhancements, validates via critic agent, and tracks effectiveness metrics.",
