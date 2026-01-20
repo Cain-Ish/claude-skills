@@ -1,0 +1,41 @@
+{
+  "name": "claude-skills-marketplace",
+  "version": "1.0.0",
+  "description": "Collection of Claude Code plugins for enhanced AI-assisted development",
+  "author": "Claude Skills",
+  "homepage": "https://github.com/Cain-Ish/claude-skills",
+  "plugins": [
+    {
+      "name": "reflect",
+      "path": "plugins/reflect",
+      "version": "1.0.0",
+      "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals (corrections, successes, edge cases), proposes skill enhancements with confidence levels, validates proposals via critic agent against 12-factor principles, and tracks effectiveness metrics over time.",
+      "author": "Claude Skills",
+      "tags": [
+        "self-improvement",
+        "learning",
+        "skills",
+        "metrics",
+        "reflection",
+        "12-factor-agent"
+      ],
+      "platforms": ["darwin", "linux", "win32"],
+      "featured": true,
+      "commands": ["/reflect"],
+      "hooks": ["PreToolUse", "Stop"],
+      "agents": ["reflect-critic"]
+    }
+  ],
+  "categories": [
+    {
+      "name": "Development",
+      "description": "Plugins that enhance the development workflow",
+      "plugins": ["reflect"]
+    },
+    {
+      "name": "Self-Improvement",
+      "description": "Plugins that help Claude learn and improve",
+      "plugins": ["reflect"]
+    }
+  ]
+}
