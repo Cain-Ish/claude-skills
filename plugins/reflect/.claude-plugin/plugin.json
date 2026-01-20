@@ -2,69 +2,18 @@
   "name": "reflect",
   "version": "1.0.0",
   "description": "Self-improvement system for Claude Code skills. Analyzes sessions, detects improvement signals, proposes skill enhancements, and tracks effectiveness metrics.",
-  "author": "Claude Skills",
+  "author": {
+    "name": "Cain-Ish",
+    "url": "https://github.com/Cain-Ish"
+  },
   "license": "MIT",
   "homepage": "https://github.com/Cain-Ish/claude-skills",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Cain-Ish/claude-skills.git"
-  },
+  "repository": "https://github.com/Cain-Ish/claude-skills",
   "keywords": [
     "self-improvement",
     "reflection",
     "learning",
     "skills",
-    "metrics",
-    "12-factor-agent"
-  ],
-  "commands": {
-    "reflect": {
-      "file": "commands/reflect.md",
-      "description": "Analyze session and propose skill improvements",
-      "arguments": "[skill] | on | off | status | stats | validate | analyze-effectiveness | improve"
-    }
-  },
-  "skills": {
-    "reflect": {
-      "file": "skills/reflect/SKILL.md",
-      "description": "Analyze sessions and propose improvements to skills based on corrections, successes, and edge cases"
-    }
-  },
-  "agents": {
-    "reflect-critic": {
-      "file": "agents/reflect-critic.md",
-      "description": "Validates reflect proposals against 12-factor agent principles and context engineering best practices"
-    }
-  },
-  "hooks": {
-    "PreToolUse": {
-      "file": "hooks/PreToolUse.md",
-      "description": "Suggests skill reflection before git commits"
-    },
-    "Stop": {
-      "file": "hooks/Stop.md",
-      "description": "Captures learnings at end of session when auto-reflect is enabled"
-    }
-  },
-  "scripts": {
-    "reflect": "scripts/reflect.sh",
-    "reflect-track-proposal": "scripts/reflect-track-proposal.sh",
-    "reflect-track-outcome": "scripts/reflect-track-outcome.sh",
-    "reflect-stats": "scripts/reflect-stats.sh",
-    "reflect-analyze-effectiveness": "scripts/reflect-analyze-effectiveness.sh",
-    "reflect-commit-changes": "scripts/reflect-commit-changes.sh",
-    "reflect-cleanup-memories": "scripts/reflect-cleanup-memories.sh",
-    "reflect-analyze-all": "scripts/reflect-analyze-all.sh",
-    "reflect-config": "scripts/reflect-config.sh"
-  },
-  "configuration": {
-    "metricsFile": "~/.claude/reflect-metrics.jsonl",
-    "stateFile": "~/.claude/reflect-skill-state.json",
-    "memoriesDir": "~/.claude/memories/",
-    "externalFeedbackDir": "~/.claude/reflect-external-feedback/"
-  },
-  "platforms": ["darwin", "linux", "win32"],
-  "requirements": {
-    "win32": "Requires WSL or Git Bash for script execution"
-  }
+    "metrics"
+  ]
 }
