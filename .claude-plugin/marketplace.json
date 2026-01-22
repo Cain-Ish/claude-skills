@@ -9,12 +9,12 @@
   },
   "plugins": [
     {
-      "name": "cainish",
+      "name": "reflect",
       "source": "./plugins/reflect",
       "version": "1.0.0",
       "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals, proposes skill enhancements, validates via critic agent, and tracks effectiveness metrics.",
       "author": {
-        "name": "Cain-Ish"
+        "name": "Claude Skills Contributors"
       },
       "repository": "https://github.com/Cain-Ish/claude-skills",
       "license": "MIT",
@@ -24,6 +24,25 @@
         "skills",
         "metrics",
         "reflection"
+      ],
+      "category": "development"
+    },
+    {
+      "name": "process-janitor",
+      "source": "./plugins/process-janitor",
+      "version": "1.0.0",
+      "description": "Safely detect and clean up leftover processes when multiple Claude Code instances are running. Multi-layer safety checks prevent false positives.",
+      "author": {
+        "name": "Claude Skills Contributors"
+      },
+      "repository": "https://github.com/Cain-Ish/claude-skills",
+      "license": "MIT",
+      "keywords": [
+        "process-management",
+        "cleanup",
+        "multi-instance",
+        "maintenance",
+        "heartbeat"
       ],
       "category": "development"
     }

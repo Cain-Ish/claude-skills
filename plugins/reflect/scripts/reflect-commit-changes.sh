@@ -4,6 +4,12 @@
 
 set -euo pipefail
 
+# Source shared library for validation functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/lib/common.sh" ]]; then
+    source "$SCRIPT_DIR/lib/common.sh"
+fi
+
 # Usage information
 usage() {
     cat <<EOF
@@ -16,13 +22,15 @@ Arguments:
   COMMIT_MESSAGE    Summary of changes (will be prefixed with "[skill]:")
 
 Options:
+  --session ID      Session identifier for tracking (optional)
   --dry-run         Show what would be done without making changes
   --no-push         Commit but don't push to remote
   --pull-first      Pull from remote before committing (handles conflicts)
 
 Examples:
   $0 reflect "improve signal detection"
-  $0 frontend-design "add dark mode constraints"
+  $0 frontend-design "add dark mode constraints" --session abc123
+  $0 reflect "improve signal detection" --session "${CLAUDE_SESSION_ID}"
 
 This script:
 1. Finds the plugin repository
@@ -49,9 +57,14 @@ shift 2
 DRY_RUN=false
 NO_PUSH=false
 PULL_FIRST=false
+SESSION_ID=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
+        --session)
+            SESSION_ID="$2"
+            shift 2
+            ;;
         --dry-run)
             DRY_RUN=true
             shift
@@ -70,6 +83,35 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
+
+# Validate skill name (prevent path traversal)
+if type validate_skill_name >/dev/null 2>&1; then
+    validate_skill_name "$SKILL_NAME" || exit 1
+else
+    # Fallback validation if common.sh not sourced
+    if [[ ! "$SKILL_NAME" =~ ^[a-zA-Z0-9_-]+$ ]] || [[ ${#SKILL_NAME} -gt 100 ]]; then
+        echo "Error: Invalid skill name format" >&2
+        exit 1
+    fi
+fi
+
+# Validate commit message (sanitize newlines and control characters)
+COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\n'/ }"
+COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\r'/}"
+COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\t'/ }"
+
+# Validate session ID if provided
+if [[ -n "$SESSION_ID" ]]; then
+    if type validate_session_id >/dev/null 2>&1; then
+        validate_session_id "$SESSION_ID" || exit 1
+    else
+        # Fallback validation
+        if ! [[ "$SESSION_ID" =~ ^[a-zA-Z0-9-]+$ ]] || [[ ${#SESSION_ID} -gt 64 ]]; then
+            echo "Error: Invalid session ID format (must be alphanumeric with dashes, max 64 chars)" >&2
+            exit 1
+        fi
+    fi
+fi
 
 # Dry-run mode announcement
 if [ "$DRY_RUN" = true ]; then
@@ -186,7 +228,7 @@ if [ "$PULL_FIRST" = true ]; then
 fi
 
 # Check if file has changes
-if ! git diff --quiet "$SKILL_FILE" && ! git diff --cached --quiet "$SKILL_FILE"; then
+if ! git diff --quiet "$SKILL_FILE" || ! git diff --cached --quiet "$SKILL_FILE"; then
     echo "File has changes (unstaged or staged)" >&2
 elif git diff --quiet "$SKILL_FILE" && git diff --cached --quiet "$SKILL_FILE"; then
     echo "Error: No changes detected in $SKILL_FILE" >&2
@@ -220,7 +262,13 @@ if [ -d "$SKILL_DIR" ]; then
 fi
 
 # Format commit message
-FULL_COMMIT_MSG="$SKILL_NAME: $COMMIT_MESSAGE"
+if [ -n "$SESSION_ID" ]; then
+    FULL_COMMIT_MSG="$SKILL_NAME: $COMMIT_MESSAGE
+
+Session: $SESSION_ID"
+else
+    FULL_COMMIT_MSG="$SKILL_NAME: $COMMIT_MESSAGE"
+fi
 
 echo "Commit message: $FULL_COMMIT_MSG" >&2
 
@@ -266,6 +314,9 @@ else
     echo "  Repository: $REPO_PATH" >&2
     echo "  File: $SKILL_FILE" >&2
     echo "  Commit: $FULL_COMMIT_MSG" >&2
+    if [ -n "$SESSION_ID" ]; then
+        echo "  Session: $SESSION_ID" >&2
+    fi
     if [ "$NO_PUSH" = true ]; then
         echo "  Committed locally (not pushed)" >&2
     else

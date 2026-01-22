@@ -1,233 +1,210 @@
 ---
 name: reflect
 description: Analyze the current session and propose improvements to skills. Run after using a skill to capture learnings. Use when user says "reflect", "improve skill", "learn from this", or at end of skill-heavy sessions.
+argument-hint: "[skill-name] | on | off | status | stats [skill] | validate | improve | reflect"
+allowed-tools: Bash, Read, Write, Edit, TodoWrite, Task
+model: sonnet
 ---
 
 # Reflect Skill
 
-Analyze the current session and propose improvements to skills based on what worked, what didn't, and edge cases discovered.
+Analyze sessions and propose evidence-based skill improvements through a validated workflow.
 
-## Trigger
+## Entry Point: Argument Routing
 
-Run `/reflect` or `/reflect [skill-name]` after a session where you used a skill.
+Based on `$ARGUMENTS`, route to the appropriate workflow:
 
-Additional commands:
-- `/reflect on` - Enable automatic end-of-session reflection
-- `/reflect off` - Disable automatic reflection
-- `/reflect status` - Check if auto-reflect is enabled
+**Analysis workflows:**
+- `[skill-name]` or empty: [Main Reflection Workflow](#main-reflection-workflow)
+- `validate [skill]`: Validate existing skill against 12-factor principles
+- `improve`: Meta-improvement analysis of reflect itself
+- `reflect`: Self-reflection on the reflect skill
 
-## Workflow
+**State management:**
+- `on`: Enable auto-reflect → Run `${CLAUDE_PLUGIN_ROOT}/scripts/reflect.sh on`
+- `off`: Disable auto-reflect → Run `${CLAUDE_PLUGIN_ROOT}/scripts/reflect.sh off`
+- `status`: Check auto-reflect state → Run `${CLAUDE_PLUGIN_ROOT}/scripts/reflect.sh status`
 
-### Step 0: Check if Skill is Paused
+**Metrics & analysis:**
+- `stats [skill]`: Show effectiveness metrics → Run `${CLAUDE_PLUGIN_ROOT}/scripts/reflect-stats.sh [skill]`
+- `cleanup`: Clean old memories → Run `${CLAUDE_PLUGIN_ROOT}/scripts/reflect-cleanup-memories.sh`
 
-**IMPORTANT**: Before proceeding, check if the skill has been auto-paused due to consecutive rejections.
-
-Check for pause file:
-```bash
-PAUSED_FILE="${HOME}/.claude/reflect-paused-skills/[skill-name].paused"
-```
-
-If the file exists:
-1. Read the pause reason and timestamp
-2. Inform the user:
-   ```
-   ⚠️  Skill '[skill-name]' is currently paused
-
-   Paused at: [timestamp]
-   Reason: [reason]
-
-   This skill was auto-paused after 3+ consecutive rejections.
-
-   To resume: /reflect resume [skill-name]
-   To see stats: /reflect stats [skill-name]
-   ```
-3. **Stop the reflection workflow** - do not proceed to Step 1
-
-If the file does not exist, continue to Step 1.
+If arguments match subcommands above, execute and exit. Otherwise, continue to main workflow.
 
 ---
 
-### Step 1: Identify the Skill & Load Memories
+## Main Reflection Workflow
 
-**A. Identify skill:**
+### Step 0: Pre-Flight Checks
 
-If skill name not provided, ask:
-
-```
-Which skill should I analyze this session for?
-- frontend-design
-- code-reviewer
-- [other]
-```
-
-**B. Load relevant memories:**
-
-Before analyzing the conversation, load accumulated learnings from the memories directory.
-
-**Read cross-skill patterns:**
+**Identify skill name:**
 ```bash
-PATTERNS_FILE="${HOME}/.claude/memories/skill-patterns.md"
-if [ -f "$PATTERNS_FILE" ]; then
-    cat "$PATTERNS_FILE"
+SKILL_NAME="$ARGUMENTS"
+
+# If not provided, detect from conversation or ask user
+if [ -z "$SKILL_NAME" ]; then
+    # Ask: Which skill should I analyze? (frontend-design, code-reviewer, etc.)
+    exit
 fi
 ```
 
-**Read skill-specific preferences:**
-```bash
-PREFS_FILE="${HOME}/.claude/memories/${SKILL_NAME}-prefs.md"
-if [ -f "$PREFS_FILE" ]; then
-    cat "$PREFS_FILE"
-fi
+**Check if skill is paused:**
+
+Pause status: !`test -f ~/.claude/reflect-paused-skills/"$ARGUMENTS".paused && cat ~/.claude/reflect-paused-skills/"$ARGUMENTS".paused 2>/dev/null || echo "ACTIVE"`
+
+If paused, display:
+```
+⚠️  Skill '$SKILL_NAME' is currently paused
+
+[Show pause reason and timestamp from above]
+
+To resume: /reflect resume $SKILL_NAME
+To see stats: /reflect stats $SKILL_NAME
 ```
 
-**For reflect skill itself, read meta-learnings:**
-```bash
-if [ "$SKILL_NAME" = "reflect" ]; then
-    META_FILE="${HOME}/.claude/memories/reflect-meta.md"
-    if [ -f "$META_FILE" ]; then
-        cat "$META_FILE"
-    fi
-fi
-```
+**Stop here if paused.** Do not proceed to Step 1.
 
-These memories inform:
-- What patterns to look for in the conversation
-- Known user preferences to validate against
-- Historical issues that were previously addressed
-- Cross-skill patterns that apply to this skill
+---
 
-### Step 2: Analyze the Conversation & External Feedback
+### Step 1: Load Context & Memories
 
-**IMPORTANT: Check for external feedback FIRST** - this provides objective evidence:
+**Load accumulated learnings:**
 
-```bash
-# Check for captured external feedback
-FEEDBACK_FILE="${HOME}/.claude/reflect-external-feedback/latest-feedback.jsonl"
+**Cross-skill patterns:**
+!`cat ~/.claude/memories/skill-patterns.md 2>/dev/null || echo "# No cross-skill patterns yet"`
 
-if [ -f "$FEEDBACK_FILE" ] && grep -q "\"skill\":\"$SKILL_NAME\"" "$FEEDBACK_FILE"; then
-    # External feedback exists for this skill
-    echo "Found external feedback (test/lint errors)"
+**Skill-specific preferences:**
+!`cat ~/.claude/memories/"$ARGUMENTS"-prefs.md 2>/dev/null || echo "# No preferences for this skill yet"`
 
-    # Extract and display feedback
-    grep "\"skill\":\"$SKILL_NAME\"" "$FEEDBACK_FILE"
-fi
-```
+**Meta-learnings (if analyzing reflect itself):**
+!`if [ "$ARGUMENTS" = "reflect" ]; then cat ~/.claude/memories/reflect-meta.md 2>/dev/null || echo "# No meta-learnings yet"; fi`
 
-**External Feedback** (HIGH confidence):
-- Test failures (pytest, jest, etc.)
+These memories inform what patterns to look for and known user preferences.
+
+---
+
+### Step 2: Gather Signals
+
+**Priority 1: External Feedback (Objective Evidence)**
+
+Recent test/lint/build failures for this skill:
+!`grep "\"skill\":\"$ARGUMENTS\"" ~/.claude/reflect-external-feedback/latest-feedback.jsonl 2>/dev/null | tail -10 || echo "No external feedback"`
+
+External feedback types:
+- Test failures (pytest, jest, vitest)
 - Lint errors (ruff, eslint, mypy)
 - Build failures
 - Type errors
 
-These are **objective signals** - prioritize them over conversation signals.
+**Priority 2: Conversation Signals**
+
+For large conversations (>10k tokens), use context compression:
+```bash
+# Use Task tool with context-manager agent
+Task:
+  subagent_type: "context-manager"
+  description: "Extract reflect signals"
+  prompt: "Extract from conversation:
+    - User corrections (rejections, change requests)
+    - User successes (approvals, positive feedback)
+    - Edge cases (unexpected questions, workarounds)
+    - Repeated preferences
+    Focus on skill: $SKILL_NAME. Remove irrelevant content."
+```
+
+Otherwise, analyze full conversation for:
+
+**Signal Types & Confidence:**
+- 🔴 **CORRECTIONS** (HIGH confidence): User said "no", explicitly corrected, requested immediate changes
+- 🟢 **SUCCESSES** (MEDIUM confidence): User said "perfect"/"great", accepted output, built on it
+- 🟡 **EDGE CASES** (MEDIUM confidence): Unanticipated questions, workarounds needed, uncovered features
+- 🔵 **PREFERENCES** (LOW confidence): Repeated patterns across sessions
+
+**Count each signal type** - these numbers will be logged to metrics.
+
+📖 **Detailed signal examples**: See `references/signal-examples.md`
 
 ---
 
-**Then analyze conversation signals:**
+### Step 3: Generate & Validate Proposal
 
-**For large conversations (>10k tokens)**, first compress context:
+#### Step 3A: Draft Proposal
 
-Use the Task tool to invoke `context-manager` agent:
-```
-Task: Extract reflect-relevant signals from conversation
-Agent: context-manager
-Prompt: "Extract only these types of interactions from the conversation:
-- User corrections (explicit rejections, requests to change)
-- User successes (approvals, positive feedback)
-- Edge cases (unexpected questions, workarounds)
-- Repeated user preferences
-Focus on the skill: [skill-name]. Remove all other content."
-```
-
-📖 **Compression strategy & templates**: See `references/context-compression.md`
-
-Then analyze the compressed output (or full conversation if small) for signals. **Count them**:
-
-**Corrections** (HIGH): User said "no", explicitly corrected, asked for immediate changes
-**Successes** (MED): User said "perfect"/"great", accepted output, built on it
-**Edge Cases** (MED): Unanticipated questions, workarounds needed, features not covered
-**Preferences** (LOW): Repeated patterns across sessions
-
-📖 **Detailed examples**: See `references/signal-examples.md` (includes external feedback)
-
-Count each signal type - numbers will be logged to metrics for self-improvement tracking.
-
-### Step 3: Generate and Validate Proposal
-
-#### Step 3A: Draft Initial Proposal
-
-Use simplified format:
+Create proposal with confidence-ranked changes:
 
 ```
-Skill Reflection: [skill-name]
+Skill Reflection: $SKILL_NAME
+Session: ${CLAUDE_SESSION_ID}
 
-Signals: X corrections, Y successes, Z edge cases
+Signals: X corrections, Y successes, Z edge cases, W preferences
 
 Proposed changes:
-🔴 HIGH: [action] - "[description]"
-🟡 MED:  [action] - "[description]"
-🔵 LOW:  [action] - "[description]"
+🔴 HIGH: [Add constraint|Update guideline] - "[specific change]"
+🟡 MED:  [Add preference|Clarify ambiguity] - "[specific change]"
+🔵 LOW:  [Add preference] - "[specific change]"
 
-Commit: "[skill]: [summary]"
+Evidence:
+- [Quote specific user feedback or external errors]
+
+Commit: "$SKILL_NAME: [concise summary]"
 ```
 
-**Confidence levels**: HIGH=explicit corrections, MED=strong patterns, LOW=weak signals
-**Actions**: Add constraint, Add preference, Update guideline, Clarify ambiguity
+**Confidence mapping:**
+- HIGH = Corrections + External feedback
+- MEDIUM = Strong patterns + Edge cases + Successes
+- LOW = Weak signals + Single-instance preferences
 
-📖 **Templates & guidelines**: See `references/proposal-templates.md`
+📖 **Proposal templates**: See `references/proposal-templates.md`
 
 ---
 
-#### Step 3B: Validate with Critic Agent
+#### Step 3B: Validate with Critic
 
-**IMPORTANT**: Before presenting to user, validate the proposal using the reflect-critic agent.
+**CRITICAL**: Before presenting to user, validate with reflect-critic agent.
 
-Use the Task tool to invoke the critic:
-
-```
-Task tool:
-  subagent_type: "reflect-critic"
+```bash
+# Use Task tool to invoke critic
+Task:
+  subagent_type: "cainish:reflect-critic"
   description: "Validate reflect proposal"
   prompt: "
-    Please validate this reflect proposal:
+    Validate this proposal:
 
-    Skill: [skill-name]
+    Skill: $SKILL_NAME
     Signals: X corrections, Y successes, Z edge cases
 
     Proposed Changes:
-    [paste your drafted proposal here]
+    [paste drafted proposal]
 
     Validate against:
     1. 12-factor agent principles
     2. Signal-to-proposal alignment
     3. Implementation feasibility
 
-    Provide score (0-100) and recommendation (APPROVE/REVISE/REJECT).
+    Provide:
+    - Score (0-100)
+    - Recommendation (APPROVE/APPROVE with suggestions/REVISE/REJECT)
+    - Specific feedback
   "
 ```
 
-The critic will return:
-- **Score**: 0-100 (quality assessment)
-- **Recommendation**: APPROVE | APPROVE with suggestions | REVISE | REJECT
-- **Detailed feedback**: Strengths, concerns, specific improvements
-
-**Decision tree based on critic score:**
-
+**Decision tree:**
 - **90-100 (Excellent)**: Proceed to Step 3C with proposal as-is
-- **70-89 (Good)**: Incorporate critic's suggestions, then proceed to Step 3C
-- **50-69 (Needs work)**: Revise proposal based on critic feedback, re-validate
-- **0-49 (Poor)**: Reject proposal, consider alternative approach or gather more signals
+- **70-89 (Good)**: Incorporate critic suggestions, then proceed to Step 3C
+- **50-69 (Needs work)**: Revise proposal based on feedback, re-validate
+- **0-49 (Poor)**: Reject proposal, gather more signals or try different approach
 
-📖 **Critic validation details**: See `agents/reflect-critic.md`
+📖 **Critic validation details**: See `agents/reflect-critic.md` and `references/proposal-validation-guide.md`
 
 ---
 
 #### Step 3C: Present Final Proposal
 
-After validation (and any revisions), present to user:
+After validation, present to user:
 
 ```
-Skill Reflection: [skill-name]
+Skill Reflection: $SKILL_NAME
+Session: ${CLAUDE_SESSION_ID}
 
 Signals: X corrections, Y successes, Z edge cases
 
@@ -236,201 +213,226 @@ Proposed changes:
 🟡 MED:  [action] - "[description]"
 🔵 LOW:  [action] - "[description]"
 
-Commit: "[skill]: [summary]"
+Commit: "$SKILL_NAME: [summary]"
 
 Critic Score: X/100 ([Excellent|Good|Needs work])
-Critic Recommendation: [key points from critic]
+Critic Recommendation: [key insights]
 
 Apply? [Y/n] or describe tweaks
 ```
 
-**Include critic score and key insights** to help user make informed decision.
+---
 
 ### Step 4: If Approved
 
-1. **Log metrics**:
-   ```bash
-   ${CLAUDE_PLUGIN_ROOT}/scripts/reflect-track-proposal.sh \
-     [skill] approved --corrections X --successes Y --edge-cases Z
-   ```
+**1. Log metrics with session ID:**
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/reflect-track-proposal.sh \
+  "$SKILL_NAME" approved \
+  --session "${CLAUDE_SESSION_ID}" \
+  --corrections X \
+  --successes Y \
+  --edge-cases Z \
+  --preferences W
+```
 
-2. **Write to memories** (not SKILL.md):
+**2. Update memories (NOT the skill's SKILL.md):**
 
-   **For cross-skill patterns:**
-   If the learning applies to multiple skills (e.g., accessibility, type safety, testing):
-   ```bash
-   # Append to ~/.claude/memories/skill-patterns.md
-   PATTERNS_FILE="${HOME}/.claude/memories/skill-patterns.md"
+Choose appropriate memory file based on scope:
 
-   cat >> "$PATTERNS_FILE" <<EOF
+**Cross-skill pattern** (applies to multiple skills):
+```bash
+cat >> ~/.claude/memories/skill-patterns.md <<EOF
 
-   ---
+---
 
-   ## Pattern Name (Added: $(date +%Y-%m-%d))
+## [Pattern Name] (Added: $(date +%Y-%m-%d), Session: ${CLAUDE_SESSION_ID})
 
-   **Pattern**: Brief description
+**Pattern**: [Brief description]
 
-   **Applies to**: skill1, skill2, skill3
+**Applies to**: skill1, skill2, skill3
 
-   **Evidence**:
-   - Specific examples or data
-   - Session IDs if relevant
+**Evidence**:
+- [Specific examples]
+- Session: ${CLAUDE_SESSION_ID}
 
-   **Implementation**:
-   - Concrete guidance
-   - Code examples if applicable
-   EOF
-   ```
+**Implementation**:
+- [Concrete guidance]
+EOF
+```
 
-   **For skill-specific preferences:**
-   If the learning applies to a single skill:
-   ```bash
-   # Append to ~/.claude/memories/{skill-name}-prefs.md
-   PREFS_FILE="${HOME}/.claude/memories/${SKILL_NAME}-prefs.md"
+**Skill-specific preference**:
+```bash
+PREFS_FILE=~/.claude/memories/${SKILL_NAME}-prefs.md
 
-   # Create file if it doesn't exist
-   if [ ! -f "$PREFS_FILE" ]; then
-       cat > "$PREFS_FILE" <<EOF
-   # ${SKILL_NAME^} Preferences
+# Create if doesn't exist
+if [ ! -f "$PREFS_FILE" ]; then
+    cat > "$PREFS_FILE" <<EOF
+# ${SKILL_NAME^} Preferences
 
-   User preferences and learnings specific to the ${SKILL_NAME} skill.
+Skill-specific learnings for ${SKILL_NAME}.
 
-   Last updated: $(date +%Y-%m-%d)
+Last updated: $(date +%Y-%m-%d)
+---
+EOF
+fi
 
-   ---
-   EOF
-   fi
+cat >> "$PREFS_FILE" <<EOF
 
-   cat >> "$PREFS_FILE" <<EOF
+## [Preference Topic] (Added: $(date +%Y-%m-%d), Session: ${CLAUDE_SESSION_ID})
 
-   ## Preference Topic (Added: $(date +%Y-%m-%d))
+**Preference**: [Description]
 
-   **Preference**: Description
+**Source**: [User correction|External feedback|Edge case|Success]
 
-   **Source**: [User correction/External feedback/Edge case/Success]
+**Evidence**: [What happened]
 
-   **Evidence**: What happened
+**Implementation**: [How to apply]
+EOF
+```
 
-   **Implementation**:
-   - How to apply this preference
-   EOF
-   ```
+**Meta-learning** (improving reflect itself):
+```bash
+cat >> ~/.claude/memories/reflect-meta.md <<EOF
 
-   **For reflect meta-learnings:**
-   If improving reflect itself:
-   ```bash
-   # Append to ~/.claude/memories/reflect-meta.md
-   META_FILE="${HOME}/.claude/memories/reflect-meta.md"
+## [Learning Topic] (Added: $(date +%Y-%m-%d), Session: ${CLAUDE_SESSION_ID})
 
-   cat >> "$META_FILE" <<EOF
+**Learning**: [What was learned]
 
-   ## Learning Topic (Added: $(date +%Y-%m-%d))
+**Evidence**: [Data/research/metrics]
 
-   **Learning**: What was learned
+**Application**: [How this changes reflect's behavior]
+EOF
+```
 
-   **Evidence**:
-   - Data or research supporting this
-   - Metrics or user feedback
+**3. Only modify SKILL.md for structural changes:**
 
-   **Application**:
-   - How this changes reflect's behavior
-   EOF
-   ```
+Only edit actual SKILL.md if:
+- Adding new workflow step
+- Changing core instructions
+- Fixing bugs in the skill logic
 
-   **Update last modified timestamp:**
-   ```bash
-   # Update "Last updated" line in the file
-   sed -i.bak "s/Last updated: .*/Last updated: $(date +%Y-%m-%d)/" "$MEMORY_FILE"
-   rm -f "$MEMORY_FILE.bak"
-   ```
+For preferences/learnings, use memories.
 
-3. **Only modify SKILL.md for structural changes:**
+**4. Commit & push:**
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/reflect-commit-changes.sh \
+  "$SKILL_NAME" "[summary]" \
+  --session "${CLAUDE_SESSION_ID}"
+```
 
-   Only edit the actual SKILL.md file if:
-   - Adding a new workflow step
-   - Changing core instructions
-   - Fixing bugs in the skill itself
+📖 **Git workflow details**: See `references/git-workflow.md`
 
-   For accumulated learnings and preferences, use memories instead.
+**5. Confirm:**
+```
+✓ Memory updated for $SKILL_NAME
+✓ Metrics logged (session: ${CLAUDE_SESSION_ID})
+✓ Changes committed and pushed
+```
 
-4. **Commit & push** using helper script:
-   ```bash
-   ${CLAUDE_PLUGIN_ROOT}/scripts/reflect-commit-changes.sh \
-     [skill] "[summary]"
-   ```
-
-   Or manually: See `references/git-workflow.md`
-
-5. Confirm: "Memory updated and pushed to remote"
+---
 
 ### Step 5: If Declined
 
-1. **Log metrics**:
-   ```bash
-   ${CLAUDE_PLUGIN_ROOT}/scripts/reflect-track-proposal.sh \
-     [skill] rejected --corrections X --successes Y --edge-cases Z
-   ```
-
-2. Optionally save observations to `${CLAUDE_PLUGIN_ROOT}/skills/[skill]/OBSERVATIONS.md`
-
-## Toggle Commands
-
-### `/reflect on`
-
-Enable automatic end-of-session reflection:
-1. Create/update `~/.claude/reflect-skill-state.json` with `{"enabled": true, "updatedAt": "[timestamp]"}`
-2. Confirm: "Auto-reflect enabled. Sessions will be analyzed automatically when you stop."
-
-### `/reflect off`
-
-Disable automatic reflection:
-1. Update `~/.claude/reflect-skill-state.json` with `{"enabled": false, "updatedAt": "[timestamp]"}`
-2. Confirm: "Auto-reflect disabled. Use /reflect manually to analyze sessions."
-
-### `/reflect status`
-
-Check current status:
-1. Read `~/.claude/reflect-skill-state.json`
-2. Report: "Auto-reflect is [enabled/disabled]" with last updated timestamp
-
-**Note:** The state file is saved in the global Claude user directory (`~/.claude/`) so it persists across plugin upgrades.
-
-## Example
-
-```
-Skill Reflection: frontend-design
-Signals: 2 corrections, 3 successes
-
-Proposed changes:
-🔴 HIGH: Add constraint - "Never use gradients unless requested"
-🔴 HIGH: Update guideline - "Dark backgrounds: use #000 not #1a1a1a"
-🟡 MED: Add preference - "Prefer CSS Grid for card layouts"
-
-Commit: "frontend-design: no gradients, #000 dark, prefer Grid"
-Apply? [Y/n]
-```
-
-## Metrics & Self-Improvement
-
-Reflect tracks effectiveness via `~/.claude/reflect-metrics.jsonl`:
-- **Proposal events**: Logged when user approves/rejects changes
-- **Outcome events**: Track if improvements actually helped (future sessions)
-- **Meta-improvement**: `/reflect reflect` will analyze metrics and improve itself
-
-Scripts: `reflect-track-proposal.sh`, `reflect-track-outcome.sh`
-
-## Git Workflow
-
-Use the helper script to commit changes:
+**1. Log rejection metrics:**
 ```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/reflect-commit-changes.sh [skill] "[summary]"
+${CLAUDE_PLUGIN_ROOT}/scripts/reflect-track-proposal.sh \
+  "$SKILL_NAME" rejected \
+  --session "${CLAUDE_SESSION_ID}" \
+  --corrections X \
+  --successes Y \
+  --edge-cases Z \
+  --preferences W
 ```
 
-📖 **Manual workflow**: See `references/git-workflow.md`
+**2. Optionally save observations:**
+
+Save to `${CLAUDE_PLUGIN_ROOT}/skills/$SKILL_NAME/OBSERVATIONS.md` for future reference.
+
+**3. Check for auto-pause:**
+
+If this is the 3rd consecutive rejection, the skill will be auto-paused by the tracking script.
+
+---
+
+## Advanced Workflows
+
+### Validate Skill
+
+When invoked as `/reflect validate [skill-name]`:
+
+1. Load the skill's SKILL.md
+2. Use Task tool with `reflect-critic` agent to validate against 12-factor principles
+3. Report score and recommendations without modifying anything
+
+### Meta-Improvement
+
+When invoked as `/reflect improve`:
+
+Run effectiveness analysis:
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/reflect-analyze-effectiveness.sh
+```
+
+This analyzes metrics to identify patterns in proposal acceptance/rejection and suggests improvements to the reflect workflow itself.
+
+### Self-Reflection
+
+When invoked as `/reflect reflect`:
+
+Apply the reflect workflow to itself:
+1. Analyze recent reflect sessions
+2. Detect patterns in how reflect works
+3. Propose improvements to reflect's own SKILL.md
+4. Update `~/.claude/memories/reflect-meta.md`
+
+---
+
+## Reference Documentation
+
+For comprehensive details, see these reference files:
+
+- **`references/signal-examples.md`** - Detailed examples of each signal type with evidence patterns
+- **`references/proposal-templates.md`** - Templates for HIGH/MED/LOW confidence proposals
+- **`references/12-factor-compliance.md`** - 12-factor agent principles guide
+- **`references/proposal-validation-guide.md`** - How critic validates proposals
+- **`references/metrics-schema.md`** - JSONL schema for metrics tracking
+- **`references/memory-system.md`** - Memory file management patterns
+- **`references/git-workflow.md`** - Git commit and push procedures
+- **`references/context-compression.md`** - Handling large conversations
+- **`references/error-handling.md`** - Error handling patterns
+- **`references/automated-cleanup-guide.md`** - Memory cleanup procedures
+- **`references/phase-5-guide.md`** - Advanced workflow guidance
+
+---
 
 ## Important Notes
 
-- Always show the exact changes before applying
-- Never modify skills without explicit user approval
-- Commit messages should be concise and descriptive
-- Push only after successful commit
+- **Always show exact changes** before applying
+- **Never modify skills** without explicit user approval
+- **Use memories** for accumulated learnings (not SKILL.md)
+- **Count signals accurately** for metrics tracking
+- **Include session IDs** for better correlation
+- **Validate with critic** before presenting proposals
+- **Commit messages** should be concise and descriptive
+
+## Example Output
+
+```
+Skill Reflection: frontend-design
+Session: abc123def456
+
+Signals: 2 corrections, 3 successes, 1 edge case
+
+Proposed changes:
+🔴 HIGH: Add constraint - "Never use gradients unless explicitly requested"
+🔴 HIGH: Update guideline - "Dark backgrounds: always use #000 not #1a1a1a"
+🟡 MED: Add preference - "Prefer CSS Grid over Flexbox for card layouts"
+
+Commit: "frontend-design: no gradients, #000 dark, prefer Grid"
+
+Critic Score: 92/100 (Excellent)
+Critic: Strong signal alignment, clear constraints, actionable
+
+Apply? [Y/n]
+```

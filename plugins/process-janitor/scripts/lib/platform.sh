@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# Reflect Plugin - Cross-Platform Compatibility Layer
+# Process Janitor Plugin - Cross-Platform Compatibility Layer
 # ============================================================================
 # Provides platform-specific implementations for commands that differ
 # between macOS, Linux, and Windows (Git Bash).
@@ -149,7 +149,7 @@ sed_inplace() {
 # Create temporary file
 # Usage: temp_file=$(create_temp_file)
 create_temp_file() {
-    local prefix="${1:-reflect}"
+    local prefix="${1:-janitor}"
 
     if command -v mktemp &>/dev/null; then
         mktemp -t "${prefix}.XXXXXX"
@@ -165,7 +165,7 @@ create_temp_file() {
 # Create temporary directory
 # Usage: temp_dir=$(create_temp_dir)
 create_temp_dir() {
-    local prefix="${1:-reflect}"
+    local prefix="${1:-janitor}"
 
     if command -v mktemp &>/dev/null; then
         mktemp -d -t "${prefix}.XXXXXX"

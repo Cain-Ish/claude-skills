@@ -1,0 +1,26 @@
+{
+  "name": "process-janitor",
+  "version": "1.0.0",
+  "description": "Safely detect and clean up leftover processes when multiple Claude Code instances are running",
+  "author": {
+    "name": "Claude Skills Contributors"
+  },
+  "license": "MIT",
+  "keywords": [
+    "process-management",
+    "cleanup",
+    "multi-instance",
+    "maintenance"
+  ],
+  "hooks": {
+    "SessionStart": "hooks/SessionStart.md",
+    "SessionEnd": "hooks/SessionEnd.md",
+    "Stop": "hooks/Stop.md"
+  },
+  "commands": {
+    "cleanup": "commands/cleanup.md"
+  },
+  "skills": {
+    "process-cleanup": "skills/process-cleanup/SKILL.md"
+  }
+}

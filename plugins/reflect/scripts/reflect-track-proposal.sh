@@ -34,9 +34,11 @@ Arguments:
 
 Options:
   --session-id ID   Session identifier (auto-generated if not provided)
+  --session ID      Alias for --session-id
   --corrections N   Number of corrections detected (default: 0)
   --successes N     Number of successes detected (default: 0)
   --edge-cases N    Number of edge cases detected (default: 0)
+  --preferences N   Number of preferences detected (default: 0)
   --changes JSON    JSON array of proposed changes
   --modifications TEXT  User's modifications to proposal (if modified)
   --critic-score N  Critic agent score 0-100 (optional, Phase 4)
@@ -66,6 +68,7 @@ SESSION_ID=$(generate_session_id)
 CORRECTIONS=0
 SUCCESSES=0
 EDGE_CASES=0
+PREFERENCES=0
 CHANGES_JSON="[]"
 MODIFICATIONS=""
 CRITIC_SCORE=""
@@ -75,7 +78,7 @@ CRITIC_CONCERNS="[]"
 # Parse optional arguments
 while [ $# -gt 0 ]; do
     case "$1" in
-        --session-id)
+        --session-id|--session)
             SESSION_ID="$2"
             shift 2
             ;;
@@ -89,6 +92,10 @@ while [ $# -gt 0 ]; do
             ;;
         --edge-cases)
             EDGE_CASES="$2"
+            shift 2
+            ;;
+        --preferences)
+            PREFERENCES="$2"
             shift 2
             ;;
         --changes)
@@ -121,6 +128,38 @@ done
 # Validate inputs
 validate_skill_name "$SKILL_NAME" || exit 1
 validate_action "$USER_ACTION" || exit 1
+validate_session_id "$SESSION_ID" || exit 1
+
+# Validate JSON arrays if provided
+if [ "$CHANGES_JSON" != "[]" ]; then
+    if command -v jq >/dev/null 2>&1; then
+        if ! echo "$CHANGES_JSON" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            log_error "Invalid JSON array for --changes parameter"
+            exit 1
+        fi
+    else
+        # Basic validation without jq
+        if ! [[ "$CHANGES_JSON" =~ ^\[.*\]$ ]]; then
+            log_error "Invalid JSON array format for --changes (must start with [ and end with ])"
+            exit 1
+        fi
+    fi
+fi
+
+if [ "$CRITIC_CONCERNS" != "[]" ]; then
+    if command -v jq >/dev/null 2>&1; then
+        if ! echo "$CRITIC_CONCERNS" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            log_error "Invalid JSON array for --critic-concerns parameter"
+            exit 1
+        fi
+    else
+        # Basic validation without jq
+        if ! [[ "$CRITIC_CONCERNS" =~ ^\[.*\]$ ]]; then
+            log_error "Invalid JSON array format for --critic-concerns (must start with [ and end with ])"
+            exit 1
+        fi
+    fi
+fi
 
 # Build JSON event
 TIMESTAMP=$(get_timestamp)
@@ -153,7 +192,7 @@ fi
 
 # Create JSON line
 JSON_EVENT=$(cat <<EOF
-{"type":"proposal","timestamp":"$TIMESTAMP","session_id":"$SESSION_ID","skill":"$SKILL_NAME","signals":{"corrections":$CORRECTIONS,"successes":$SUCCESSES,"edge_cases":$EDGE_CASES},"proposal":{"changes":$CHANGES_JSON},"user_action":"$USER_ACTION","modifications":$MODIFICATIONS_JSON$CRITIC_FIELDS}
+{"type":"proposal","timestamp":"$TIMESTAMP","session_id":"$SESSION_ID","skill":"$SKILL_NAME","signals":{"corrections":$CORRECTIONS,"successes":$SUCCESSES,"edge_cases":$EDGE_CASES,"preferences":$PREFERENCES},"proposal":{"changes":$CHANGES_JSON},"user_action":"$USER_ACTION","modifications":$MODIFICATIONS_JSON$CRITIC_FIELDS}
 EOF
 )
 
