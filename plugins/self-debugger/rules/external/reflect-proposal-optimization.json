@@ -1,0 +1,47 @@
+{
+  "id": "reflect-proposal-optimization",
+  "name": "Reflect Proposal Success Rate Analysis",
+  "version": "1.0.0",
+  "description": "Analyzes reflect plugin proposal success rates to optimize signal detection and improve proposal quality",
+  "severity": "medium",
+  "category": "optimization",
+  "enabled": true,
+  "detection": {
+    "type": "metrics-analysis",
+    "metrics_file": "~/.claude/reflect/proposals.jsonl",
+    "min_samples": 10,
+    "analysis_patterns": [
+      {
+        "id": "low_approval_rate_by_type",
+        "description": "Proposal type has low critic approval rate",
+        "condition": "approval_rate < 0.4 for proposal_type",
+        "severity": "high",
+        "recommendation": "adjust_signal_detection"
+      },
+      {
+        "id": "low_implementation_rate",
+        "description": "Approved proposals not being implemented",
+        "condition": "implementation_rate < 0.5 for approved proposals",
+        "severity": "medium",
+        "recommendation": "improve_proposal_actionability"
+      },
+      {
+        "id": "signal_type_performance",
+        "description": "Some signal types perform much better than others",
+        "condition": "variance in success_rate > 0.3 across signal_types",
+        "severity": "low",
+        "recommendation": "focus_on_successful_signals"
+      }
+    ]
+  },
+  "script": "./scripts/detect-reflect-proposals.sh",
+  "fix_generator": "./scripts/fix-reflect-proposals.sh",
+  "metadata": {
+    "plugin_target": "reflect",
+    "config_file": "~/.claude/plugins/reflect/config/default-config.json",
+    "metrics_source": "~/.claude/reflect/proposals.jsonl",
+    "requires_user_data": true,
+    "safe_auto_fix": false,
+    "tags": ["optimization", "proposal-quality", "metrics-driven", "meta-optimization"]
+  }
+}

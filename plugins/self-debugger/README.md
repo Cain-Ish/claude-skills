@@ -53,8 +53,90 @@ When you start Claude Code in the claude-skills repository:
 ### Manual Commands
 
 - `/debug` - Show detected issues and monitor status
+- `/debug plugin-status` - Show which plugins can be enhanced
+- `/debug optimize` - Run optimizations for available plugins
 - `/debug scan` - Force immediate scan (coming soon)
 - `/debug fix [issue-id]` - Generate and apply fix (coming soon)
+
+## Plugin Composition (Cross-Plugin Optimization)
+
+Self-debugger can **enhance other plugins** by analyzing their usage patterns and suggesting optimizations. This uses the **Plugin Composition Pattern** with loose coupling - plugins work independently but can optionally enhance each other.
+
+### How It Works
+
+```
+Your Plugin                    Self-Debugger
+    │                                │
+    ├─ Logs metrics                  │
+    │  (works standalone)            │
+    │                                │
+    │                           ├─ Detects patterns
+    │                           │  (if plugin installed)
+    │                           │
+    │                           ├─ Suggests optimizations
+    │                           │  (optional enhancement)
+```
+
+### Currently Enhanced Plugins
+
+#### Multi-Agent ← Self-Debugger
+- **Data**: Complexity scores and user approval decisions
+- **Optimization**: Threshold calibration based on approval patterns
+- **Minimum**: 20 executions
+- **Impact**: Fewer false-positive multi-agent suggestions
+
+**Example**:
+```bash
+$ /debug optimize
+
+Running multi-agent threshold analysis...
+⚠️  PARALLEL pattern has low approval rate (33%)
+    Recommendation: Increase threshold from 50 to 60
+    Impact: Reduce false-positive suggestions by ~30%
+```
+
+#### Reflect ← Self-Debugger
+- **Data**: Proposal types and critic approval rates
+- **Optimization**: Signal detection improvements
+- **Minimum**: 10 proposals
+- **Impact**: Higher quality skill proposals
+
+**Example**:
+```bash
+$ /debug optimize
+
+Running reflect proposal analysis...
+⚠️  SESSION_ANALYSIS proposals have low approval rate (40%)
+    Recommendation: Adjust signal detection rules
+    Impact: Focus on higher-quality proposal types
+```
+
+### Check Enhancement Status
+
+```bash
+$ /debug plugin-status
+
+Plugin Enhancement Status:
+
+  ✓ Multi-Agent: Active (25 executions logged)
+    → Ready for threshold optimization
+
+  ✓ Reflect: Active (15 proposals logged)
+    → Ready for proposal optimization
+
+  ○ Process-Janitor: Not detected
+
+Install and use plugins to enable self-optimization features.
+```
+
+### Key Principles
+
+- **No hard dependencies**: Plugins work standalone
+- **Optional enhancement**: Features are additive only
+- **Graceful degradation**: Missing plugins don't cause errors
+- **User control**: Any plugin can be enabled/disabled independently
+
+See [PLUGIN_COMPOSITION_PATTERN.md](../../PLUGIN_COMPOSITION_PATTERN.md) for complete documentation.
 
 ## Configuration
 
