@@ -1,0 +1,37 @@
+{
+  "rule_id": "hook-session-start-valid",
+  "version": "1.0.0",
+  "category": "hook-correctness",
+  "severity": "error",
+  "confidence": 0.95,
+  "applies_to": {
+    "component": "hooks",
+    "pattern": "SessionStart\\.md$"
+  },
+  "validation": {
+    "type": "static",
+    "checks": [
+      {
+        "check_id": "has-event-frontmatter",
+        "type": "regex",
+        "pattern": "^---\\s*\\nevent:\\s*SessionStart",
+        "error_message": "SessionStart hook must have YAML frontmatter with 'event: SessionStart'"
+      },
+      {
+        "check_id": "frontmatter-closed",
+        "type": "structure",
+        "min_dashes": 2,
+        "error_message": "YAML frontmatter must be properly closed with '---'"
+      }
+    ]
+  },
+  "fix_template": {
+    "type": "prepend",
+    "content": "---\nevent: SessionStart\n---\n\n"
+  },
+  "references": [
+    "https://docs.anthropic.com/claude-code/plugins/hooks"
+  ],
+  "learned_from": "manual",
+  "last_updated": "2026-01-23"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "self-debugger",
+  "version": "1.0.0",
+  "description": "Meta-plugin that monitors, debugs, and improves all plugins by detecting issues, generating fixes, and committing them to feature branches. Auto-discovers patterns via web search and continuously self-improves.",
+  "author": {
+    "name": "Claude Skills Contributors",
+    "url": "https://github.com/Cain-Ish"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/Cain-Ish/claude-skills",
+  "repository": "https://github.com/Cain-Ish/claude-skills",
+  "keywords": [
+    "debugging",
+    "meta-plugin",
+    "self-improvement",
+    "validation",
+    "code-quality",
+    "plugin-development"
+  ]
+}
