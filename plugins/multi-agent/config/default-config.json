@@ -1,0 +1,28 @@
+{
+  "token_budget": 200000,
+  "complexity_thresholds": {
+    "simple": 30,
+    "moderate": 50,
+    "complex": 70
+  },
+  "auto_approve": {
+    "single_agent": true,
+    "sequential": false,
+    "parallel": false,
+    "hierarchical": false
+  },
+  "cost_awareness": {
+    "show_estimates": true,
+    "warn_on_high_multiplier": true,
+    "warn_threshold": 10
+  },
+  "metrics": {
+    "enabled": true,
+    "log_file": "~/.claude/multi-agent-metrics.jsonl"
+  },
+  "fallback_behavior": {
+    "on_agent_failure": "fallback_to_general",
+    "on_budget_exceeded": "prompt_user",
+    "on_invalid_analysis": "default_to_single"
+  }
+}

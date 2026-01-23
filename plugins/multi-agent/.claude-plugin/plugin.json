@@ -1,0 +1,20 @@
+{
+  "name": "multi-agent",
+  "version": "1.0.0",
+  "description": "Intelligent orchestration system that analyzes task complexity and automatically coordinates single or multiple agents with transparent cost-benefit analysis. Uses research-proven patterns (sequential, parallel, hierarchical) to achieve 90% better results on complex tasks.",
+  "author": {
+    "name": "Claude Skills Contributors",
+    "url": "https://github.com/Cain-Ish"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/Cain-Ish/claude-skills",
+  "repository": "https://github.com/Cain-Ish/claude-skills",
+  "keywords": [
+    "orchestration",
+    "multi-agent",
+    "coordination",
+    "complexity-analysis",
+    "cost-optimization",
+    "agent-routing"
+  ]
+}
