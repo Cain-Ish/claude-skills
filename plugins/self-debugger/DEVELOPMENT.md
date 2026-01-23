@@ -269,6 +269,98 @@ After validation works correctly, implement:
 - **Plan document**: Full architecture and phase breakdown
 - **Claude Code docs**: Plugin API and hook specifications
 
+## Phase 4 & 5: Self-Improvement and Web Discovery
+
+These phases are now complete! Here's how to use them:
+
+### Self-Improvement Workflow
+
+```bash
+# 1. Apply several fixes (minimum 5 per rule for meaningful data)
+/debug fix [issue-id]
+/debug fix [issue-id]
+# ... repeat
+
+# 2. Run self-improvement analysis
+/self-improve
+
+# 3. Review confidence adjustments
+git diff plugins/self-debugger/rules/core/
+
+# 4. Check health score
+cat ~/.claude/self-debugger/metrics.jsonl | tail -1 | jq .
+
+# 5. Merge self-improvement branch after review
+git checkout debug/self-debugger/confidence-adjustment
+git log -1  # Review changes
+# Create MR for review
+```
+
+### Web Discovery Workflow
+
+```bash
+# 1. Run web discovery (requires WebSearch tool)
+/self-improve web
+
+# 2. Check external rules created
+ls -la plugins/self-debugger/rules/external/
+
+# 3. Review discovered patterns
+cat plugins/self-debugger/rules/external/*.json | jq .
+
+# 4. Validate external rules with scans
+./plugins/self-debugger/scripts/scan-plugins.sh
+
+# 5. Promote high-confidence rules to core
+# (manually review and move from external/ to core/)
+```
+
+### Confidence Adjustment Algorithm
+
+Rules are adjusted based on approval rates:
+
+```bash
+# High approval (≥90%)
+confidence += 0.05
+
+# Low approval (≤30%)
+confidence -= 0.10
+
+# Medium approval
+confidence -= 0.02
+```
+
+Constraints:
+- Minimum 5 detections required
+- Confidence clamped to 0.1-1.0
+- Changes go to feature branches
+
+### Health Score Formula
+
+```
+health_score = resolution_rate - false_positive_rate
+
+Where:
+  resolution_rate = (resolved_issues / total_issues) * 100
+  false_positive_rate = (issues_pending_>7_days / total_issues) * 100
+```
+
+Healthy plugin: Score ≥ 70
+
+### Web Discovery Confidence
+
+```
+base_confidence = 0.5
+
+if official_source:
+    confidence = 0.8
+
+if has_code_examples:
+    confidence += 0.1
+
+max_confidence = 0.95  # Never full confidence for web sources
+```
+
 ## Questions?
 
 If you get stuck, check:
@@ -276,4 +368,6 @@ If you get stuck, check:
 1. Logs in `~/.claude/self-debugger/sessions/[session-id]/`
 2. Issue records in `~/.claude/self-debugger/findings/issues.jsonl`
 3. Rule files in `plugins/self-debugger/rules/core/`
-4. This development guide (DEVELOPMENT.md)
+4. Metrics in `~/.claude/self-debugger/metrics.jsonl`
+5. Web cache in `~/.claude/self-debugger/web-search-cache/`
+6. This development guide (DEVELOPMENT.md)

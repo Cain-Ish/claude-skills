@@ -174,15 +174,36 @@ State stored in `~/.claude/self-debugger/`:
 
 **Note**: Agent invocations await Task tool integration. Manual workflow available via scripts.
 
-### ⏳ Phase 4: Self-Improvement (Pending)
-- [ ] self-improve.sh script
-- [ ] Metrics analysis
-- [ ] Rule confidence adjustment
+### ✅ Phase 4: Self-Improvement (Complete)
+- [x] self-improve.sh script
+- [x] Metrics analysis (health score calculation)
+- [x] Rule confidence adjustment based on approval rates
+- [x] Feature branch workflow for self-improvements
+- [x] /self-improve command
 
-### ⏳ Phase 5: Web Discovery (Pending)
-- [ ] web-search.sh library
-- [ ] web-discover.sh script
-- [ ] External rules
+**Capabilities**:
+- Analyzes fix approval rates per rule
+- Adjusts confidence scores (±0.05 to ±0.10)
+- Calculates health score (0-100)
+- Commits improvements to feature branches
+- Tracks effectiveness metrics
+
+### ✅ Phase 5: Web Discovery (Complete - Framework Ready)
+- [x] web-search.sh library (WebSearch/WebFetch wrappers)
+- [x] web-discover.sh script
+- [x] External rules structure
+- [x] Pattern extraction framework
+- [x] Source confidence scoring
+- [x] /self-improve web command
+
+**Capabilities**:
+- Web search integration (awaiting WebSearch tool)
+- Official source detection (docs.anthropic.com)
+- Confidence scoring (0.5-0.95 for web sources)
+- External rule generation
+- 7-day search result caching
+
+**Note**: Web search integration awaits WebSearch/WebFetch tool availability. Framework is complete and ready for integration.
 
 ## Contributing
 

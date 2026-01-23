@@ -172,6 +172,65 @@ plugins/self-debugger/
 └── IMPLEMENTATION_SUMMARY.md            ✅ This file
 ```
 
+### Phase 4: Self-Improvement
+**Status**: 100% Complete
+
+1. **Self-Improvement Script**
+   - ✅ `scripts/self-improve.sh` - **FULLY IMPLEMENTED**
+     - Health score calculation (0-100)
+     - Rule effectiveness analysis
+     - Confidence adjustment algorithm
+     - Feature branch workflow
+     - Metrics recording
+
+2. **Analysis Capabilities**
+   - ✅ Fix approval rate per rule
+   - ✅ False positive detection (issues pending > 7 days)
+   - ✅ Resolution rate tracking
+   - ✅ Health score: resolution_rate - false_positive_rate
+
+3. **Confidence Adjustment**
+   - ✅ High approval (≥90%): +0.05 confidence
+   - ✅ Low approval (≤30%): -0.10 confidence
+   - ✅ Medium approval: -0.02 confidence
+   - ✅ Clamped to 0.1-1.0 range
+   - ✅ Minimum 5 detections required
+
+4. **User Interface**
+   - ✅ `commands/self-improve.md` - Full command specification
+     - `/self-improve` - Standard analysis
+     - `/self-improve web` - Web discovery
+
+### Phase 5: Web Discovery
+**Status**: 100% Complete (Framework Ready)
+
+1. **Web Search Library**
+   - ✅ `scripts/lib/web-search.sh` - **FULLY IMPLEMENTED**
+     - WebSearch/WebFetch wrappers
+     - Result caching (7-day freshness)
+     - Official source detection
+     - Confidence scoring
+
+2. **Discovery Script**
+   - ✅ `scripts/web-discover.sh` - **FULLY IMPLEMENTED**
+     - Pattern discovery by category
+     - External rule generation
+     - Source validation
+     - Metrics tracking
+
+3. **External Rules**
+   - ✅ `rules/external/` directory structure
+   - ✅ Example rule: `hook-has-description-external.json`
+   - ✅ Web-discovered confidence scoring (0.5-0.95)
+
+4. **Source Confidence**
+   - ✅ Official sources (docs.anthropic.com): 0.8
+   - ✅ GitHub sources: 0.6
+   - ✅ With code examples: +0.1 bonus
+   - ✅ Never exceeds 0.95 for web sources
+
+**Note**: WebSearch/WebFetch tool integration pending. All framework code complete and ready.
+
 ## 🚀 Ready for Production
 
 **What works now**:
@@ -180,10 +239,14 @@ plugins/self-debugger/
 3. Issue detection and recording
 4. Manual fix workflow via scripts
 5. Git branch management with locking
+6. **Self-improvement** with rule confidence adjustment
+7. **Web discovery framework** (ready for tool integration)
+8. **Multi-instance coordination** (global monitor lock)
+9. **Issue deduplication** (prevents duplicates)
 
-**What needs agent integration**:
-1. Automated fix generation (debugger-fixer agent)
-2. Automated fix validation (debugger-critic agent)
+**What needs integration**:
+1. Agent invocation for automated fix generation
+2. WebSearch/WebFetch tools for pattern discovery
 3. `/debug fix [id]` full automation
 
 ## 📊 Metrics Tracked
@@ -191,9 +254,10 @@ plugins/self-debugger/
 State stored in `~/.claude/self-debugger/`:
 - `findings/issues.jsonl` - All detected issues
 - `findings/fixes.jsonl` - Applied fixes
-- `metrics.jsonl` - Scan events, fix applications
+- `metrics.jsonl` - Scan events, fix applications, **self-improvement events**
 - `sessions/[id]/` - Monitor status, heartbeats, logs
 - `locks/` - Branch locks for multi-instance safety
+- `web-search-cache/` - Cached web search results (7-day TTL)
 
 ## 🔬 Testing Checklist
 
@@ -208,6 +272,11 @@ State stored in `~/.claude/self-debugger/`:
 - [x] Zero false positives on real plugins
 - [x] Git branch locking (5 layers)
 - [x] Source repo detection
+- [x] Multi-instance coordination (global lock)
+- [x] Issue deduplication
+- [x] Health score calculation
+- [x] Rule confidence adjustment
+- [x] Web discovery framework
 
 ## 🎓 Learning Mode Integration
 
