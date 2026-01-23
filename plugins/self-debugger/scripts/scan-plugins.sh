@@ -124,6 +124,11 @@ scan_plugin() {
     local all_rules="$3"
     local issues_count=0
 
+    # Scan plugin root (for rules checking file existence like README.md)
+    local component="."
+    scan_component "$plugin_dir" "$plugin_name" "$component" "$all_rules"
+    issues_count=$((issues_count + $?))
+
     # Scan plugin.json
     if [[ -f "$plugin_dir/.claude-plugin/plugin.json" ]]; then
         local component=".claude-plugin/plugin.json"
@@ -181,7 +186,8 @@ scan_component() {
 
     local file_path="$plugin_dir/$component"
 
-    if [[ ! -f "$file_path" ]]; then
+    # Skip if neither file nor directory (for root component ".")
+    if [[ ! -f "$file_path" ]] && [[ ! -d "$file_path" ]]; then
         return 0
     fi
 

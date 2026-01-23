@@ -172,8 +172,54 @@ Return a JSON object with the fix proposal:
 {
   "fix_type": "prepend",
   "description": "Add YAML frontmatter with 'event: SessionStart'",
-  "diff": "..."
+  "diff": "...",
+  "version_bump": "patch"
 }
+```
+
+## Version Management
+
+**IMPORTANT**: When applying fixes, always bump the plugin version according to semantic versioning:
+
+### Version Bump Rules
+
+1. **PATCH** (0.0.X) - Bug fixes, documentation updates, minor corrections
+   - Fixing missing frontmatter
+   - Correcting schema violations
+   - Documentation improvements
+   - Example: 1.0.0 → 1.0.1
+
+2. **MINOR** (0.X.0) - New features, backward-compatible changes
+   - Adding new hooks or agents
+   - New functionality
+   - Enhanced capabilities
+   - Example: 1.0.1 → 1.1.0
+
+3. **MAJOR** (X.0.0) - Breaking changes
+   - API changes
+   - Incompatible updates
+   - Removed functionality
+   - Example: 1.1.0 → 2.0.0
+
+### Include in Fix
+
+When generating fixes for plugin.json or after applying any fix:
+1. Read current version from `.claude-plugin/plugin.json`
+2. Determine appropriate bump (usually PATCH for self-debugger fixes)
+3. Include version update in the diff
+4. Document version bump in fix description
+
+**Example**:
+```diff
+--- a/plugins/reflect/.claude-plugin/plugin.json
++++ b/plugins/reflect/.claude-plugin/plugin.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "reflect",
+-  "version": "1.0.0",
++  "version": "1.0.1",
+   "description": "..."
+ }
 ```
 
 ## Error Handling

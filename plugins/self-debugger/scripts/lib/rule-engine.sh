@@ -174,10 +174,17 @@ execute_validation_check() {
 
     log_debug "Executing check: $check_id (type: $check_type) on $file_path"
 
-    # File must exist for most checks
-    if [[ ! -f "$file_path" ]]; then
-        log_debug "File not found: $file_path"
-        return 1  # File doesn't exist = violation
+    # Validate path exists (structure checks can work on directories, others need files)
+    if [[ "$check_type" == "structure" ]]; then
+        if [[ ! -e "$file_path" ]]; then
+            log_debug "Path not found: $file_path"
+            return 1
+        fi
+    else
+        if [[ ! -f "$file_path" ]]; then
+            log_debug "File not found: $file_path"
+            return 1
+        fi
     fi
 
     case "$check_type" in
@@ -256,9 +263,17 @@ execute_validation_check() {
             if [[ -n "$exists_check" ]]; then
                 # Check if path exists relative to plugin root
                 local plugin_dir
-                plugin_dir=$(dirname "$(dirname "$file_path")")  # Go up to plugin root
+                if [[ -d "$file_path" ]]; then
+                    # file_path is the plugin directory itself (component=".")
+                    # Remove trailing "/." if present
+                    plugin_dir="${file_path%/.}"
+                else
+                    # file_path is a file, go up to plugin root
+                    plugin_dir=$(dirname "$(dirname "$file_path")")
+                fi
                 local check_path="$plugin_dir/$exists_check"
 
+                log_debug "  Checking existence: $check_path"
                 if [[ -e "$check_path" ]]; then
                     log_debug "  ✓ Structure check passed: $exists_check exists"
                     return 0  # Valid
