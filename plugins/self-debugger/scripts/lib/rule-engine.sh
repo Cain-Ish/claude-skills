@@ -372,11 +372,7 @@ record_issue() {
         return 1
     fi
 
-    # Generate unique issue ID
-    local issue_id
-    issue_id=$(generate_uuid)
-
-    # Extract violation details
+    # Extract violation details for deduplication check
     local rule_id
     rule_id=$(echo "$violation_json" | jq -r '.rule_id' 2>/dev/null)
     local severity
@@ -387,6 +383,22 @@ record_issue() {
     error_message=$(echo "$violation_json" | jq -r '.error_message' 2>/dev/null)
     local file
     file=$(echo "$violation_json" | jq -r '.file' 2>/dev/null)
+
+    # Deduplication: Check if same issue already exists (pending status)
+    # Match criteria: plugin + component + rule_id
+    if [[ -f "$ISSUES_FILE" ]]; then
+        local existing_count
+        existing_count=$(grep -c "\"plugin\": \"$plugin\".*\"component\": \"$component\".*\"rule_id\": \"$rule_id\".*\"status\": \"pending\"" "$ISSUES_FILE" 2>/dev/null || echo "0")
+
+        if [[ "$existing_count" -gt 0 ]]; then
+            log_debug "Issue already recorded (plugin: $plugin, component: $component, rule: $rule_id), skipping duplicate"
+            return 0
+        fi
+    fi
+
+    # Generate unique issue ID
+    local issue_id
+    issue_id=$(generate_uuid)
 
     # Create issue record
     local issue
