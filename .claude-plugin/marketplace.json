@@ -12,7 +12,7 @@
       "name": "reflect",
       "source": "./plugins/reflect",
       "version": "1.0.0",
-      "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals, proposes skill enhancements, validates via critic agent, and tracks effectiveness metrics.",
+      "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals, proposes skill enhancements, validates via critic agent, and tracks effectiveness metrics. Self-optimizes proposal quality via self-debugger.",
       "author": {
         "name": "Claude Skills Contributors"
       },
@@ -25,7 +25,8 @@
         "metrics",
         "reflection"
       ],
-      "category": "development"
+      "category": "development",
+      "enhanced_by": ["self-debugger"]
     },
     {
       "name": "process-janitor",
@@ -50,7 +51,7 @@
       "name": "self-debugger",
       "source": "./plugins/self-debugger",
       "version": "1.0.0",
-      "description": "Meta-plugin that monitors, debugs, and improves all plugins by detecting issues, generating fixes, and committing them to feature branches. Auto-discovers patterns via web search and continuously self-improves.",
+      "description": "Meta-plugin that monitors, debugs, and improves all plugins by detecting issues, generating fixes, and committing them to feature branches. Optimizes other plugins (multi-agent, reflect) through the Plugin Composition Pattern. Auto-discovers patterns via web search and continuously self-improves.",
       "author": {
         "name": "Claude Skills Contributors"
       },
@@ -62,15 +63,17 @@
         "self-improvement",
         "validation",
         "code-quality",
-        "plugin-development"
+        "plugin-development",
+        "cross-plugin-optimization"
       ],
-      "category": "development"
+      "category": "development",
+      "enhances": ["multi-agent", "reflect", "process-janitor"]
     },
     {
       "name": "multi-agent",
       "source": "./plugins/multi-agent",
       "version": "1.0.0",
-      "description": "Intelligent orchestration system that analyzes task complexity and automatically coordinates single or multiple agents with transparent cost-benefit analysis. Uses research-proven patterns (sequential, parallel, hierarchical) to achieve 90% better results on complex tasks.",
+      "description": "Intelligent orchestration system that analyzes task complexity and automatically coordinates single or multiple agents with transparent cost-benefit analysis. Uses research-proven patterns (sequential, parallel, hierarchical) to achieve 90% better results on complex tasks. Self-calibrates thresholds via self-debugger.",
       "author": {
         "name": "Claude Skills Contributors"
       },
@@ -84,7 +87,8 @@
         "cost-optimization",
         "agent-routing"
       ],
-      "category": "development"
+      "category": "development",
+      "enhanced_by": ["self-debugger"]
     }
   ]
 }
