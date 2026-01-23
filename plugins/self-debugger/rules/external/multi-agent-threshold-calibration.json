@@ -1,0 +1,47 @@
+{
+  "id": "multi-agent-threshold-optimization",
+  "name": "Multi-Agent Threshold Calibration",
+  "version": "1.0.0",
+  "description": "Detects when multi-agent thresholds need adjustment based on user approval patterns from metrics",
+  "severity": "medium",
+  "category": "optimization",
+  "enabled": true,
+  "detection": {
+    "type": "metrics-analysis",
+    "metrics_file": "~/.claude/multi-agent-metrics.jsonl",
+    "min_samples": 20,
+    "analysis_patterns": [
+      {
+        "id": "low_approval_rate",
+        "description": "Pattern has low approval rate, threshold should increase",
+        "condition": "approval_rate < 0.5 for pattern in score_range",
+        "severity": "medium",
+        "recommendation": "increase_threshold"
+      },
+      {
+        "id": "high_approval_rate",
+        "description": "Pattern has very high approval rate, threshold could decrease for faster routing",
+        "condition": "approval_rate > 0.9 for pattern in score_range",
+        "severity": "low",
+        "recommendation": "decrease_threshold"
+      },
+      {
+        "id": "score_boundary_issues",
+        "description": "Users frequently reject at specific score boundaries",
+        "condition": "rejection_rate > 0.7 in narrow score_range (±5 points)",
+        "severity": "high",
+        "recommendation": "adjust_boundary"
+      }
+    ]
+  },
+  "script": "./scripts/detect-multi-agent-thresholds.sh",
+  "fix_generator": "./scripts/fix-multi-agent-thresholds.sh",
+  "metadata": {
+    "plugin_target": "multi-agent",
+    "config_file": "plugins/multi-agent/config/default-config.json",
+    "metrics_source": "~/.claude/multi-agent-metrics.jsonl",
+    "requires_user_data": true,
+    "safe_auto_fix": false,
+    "tags": ["optimization", "threshold-tuning", "metrics-driven", "meta-optimization"]
+  }
+}

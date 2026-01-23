@@ -577,11 +577,50 @@ To add new agents to the registry:
 3. Update domain keyword mappings if needed
 4. Test with sample requests to validate selection
 
+## Self-Optimization (Auto-Calibration)
+
+The multi-agent plugin can **automatically optimize its thresholds** based on your usage patterns via integration with the [self-debugger](../self-debugger) plugin.
+
+### How It Works
+
+1. **Collect Data**: Each `/multi-agent` execution logs metrics (score, pattern, approved/rejected)
+2. **Analyze Patterns**: Self-debugger detects when thresholds need adjustment
+3. **Suggest Improvements**: Recommends threshold changes based on approval rates
+4. **You Decide**: Review and apply optimizations
+
+### Example
+
+```bash
+# After 25 executions, self-debugger detects:
+⚠️  PARALLEL pattern has low approval rate (33%)
+    Average score: 58
+    Recommendation: Increase threshold from 50 to 60
+    Impact: Fewer rejected multi-agent proposals
+
+# You adjust your config:
+~/.claude/multi-agent.local.md:
+---
+complexity_thresholds:
+  complex: 60  # Increased based on usage patterns
+---
+
+# Future requests are more accurate!
+```
+
+### Benefits
+
+- **Personalized thresholds** adapt to your preferences
+- **Fewer false positives** reduce wasted tokens
+- **Continuous improvement** as you use the system more
+
+**Learn More**: See [SELF_OPTIMIZATION.md](SELF_OPTIMIZATION.md) for complete guide
+
 ## References
 
 - [Complexity Scoring Details](skills/orchestrate/references/complexity-scoring.md)
 - [Agent Registry Documentation](skills/orchestrate/references/agent-registry.md)
 - [Coordination Patterns Guide](skills/orchestrate/references/coordination-patterns.md)
+- [Self-Optimization Guide](SELF_OPTIMIZATION.md)
 
 ## License
 
