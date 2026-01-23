@@ -273,8 +273,11 @@ execute_validation_check() {
             min_dashes=$(echo "$check_json" | jq -r '.min_dashes // 0' 2>/dev/null)
 
             if [[ "$min_dashes" -gt 0 ]]; then
-                local dash_count
-                dash_count=$(grep -c '^---\s*$' "$file_path" 2>/dev/null || echo "0")
+                local dash_count=0
+                if [[ -f "$file_path" ]]; then
+                    # Count lines matching the pattern
+                    dash_count=$(grep -E '^---\s*$' "$file_path" 2>/dev/null | wc -l | tr -d ' ')
+                fi
 
                 if [[ "$dash_count" -ge "$min_dashes" ]]; then
                     log_debug "  ✓ Structure check passed: found $dash_count '---' lines (min: $min_dashes)"
