@@ -40,21 +40,24 @@ time_ago() {
 
 # Generate detailed report
 generate_report() {
-    local session_ids
+    # Initialize array explicitly to avoid unbound variable error with set -u
+    local session_ids=()
     session_ids=($(get_all_session_ids))
 
     local active_count=0
     local orphaned_count=0
     local total_count=${#session_ids[@]}
 
-    # Count active vs orphaned
-    for session_id in "${session_ids[@]}"; do
-        if [[ "$session_id" == "$CURRENT_SESSION_ID" ]] || ! is_session_orphaned "$session_id"; then
-            ((active_count++)) || true
-        else
-            ((orphaned_count++)) || true
-        fi
-    done
+    # Count active vs orphaned (skip if no sessions)
+    if [[ ${#session_ids[@]} -gt 0 ]]; then
+        for session_id in "${session_ids[@]}"; do
+            if [[ "$session_id" == "$CURRENT_SESSION_ID" ]] || ! is_session_orphaned "$session_id"; then
+                ((active_count++)) || true
+            else
+                ((orphaned_count++)) || true
+            fi
+        done
+    fi
 
     # Header
     echo ""
