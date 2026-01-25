@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "category": "documentation",
   "severity": "warning",
-  "confidence": 0.9,
+  "confidence": 0.8,
   "applies_to": {
     "pattern": "^\\.$"
   },
