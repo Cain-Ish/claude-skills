@@ -1,0 +1,44 @@
+{
+  "rule_id": "react-query-key-mismatch",
+  "version": "1.0.0",
+  "category": "react-query-correctness",
+  "severity": "error",
+  "confidence": 0.85,
+  "applies_to": {
+    "component": "**/*.{ts,tsx}",
+    "pattern": "\\b(setQueryData|invalidateQueries|getQueryData)\\b"
+  },
+  "description": "Detects when React Query cache operations (setQueryData, invalidateQueries) use different query keys than the actual queryKey defined in useQuery/useFetch calls",
+  "validation": {
+    "type": "pattern-match",
+    "checks": [
+      {
+        "check_id": "query-key-consistency",
+        "type": "semantic",
+        "pattern": "(setQueryData|invalidateQueries|getQueryData)\\s*\\(\\s*\\[([^\\]]+)\\]",
+        "comparison": "useQuery.*queryKey:\\s*\\[([^\\]]+)\\]",
+        "error_message": "Query key in cache operation doesn't match queryKey in useQuery definition. This causes optimistic updates to write to the wrong cache location."
+      }
+    ]
+  },
+  "fix_template": {
+    "type": "replace",
+    "description": "Update cache operation query key to match the queryKey from useQuery/useFetch",
+    "example": {
+      "before": "queryClient.setQueryData(['templates', serviceId], ...)",
+      "after": "queryClient.setQueryData([url, params], ...)"
+    }
+  },
+  "impact": {
+    "user_experience": "high",
+    "data_integrity": "high",
+    "description": "Optimistic updates write to wrong cache location, causing stale data and UI inconsistencies"
+  },
+  "references": [
+    "https://tanstack.com/query/latest/docs/react/guides/query-keys",
+    "https://tanstack.com/query/latest/docs/react/guides/optimistic-updates"
+  ],
+  "learned_from": "session:frontend-template-api-alignment",
+  "discovery_context": "P1 issue: TemplateDetails.tsx used ['templates', serviceId] for cache operations but useFetch used [url, params], causing optimistic updates to fail",
+  "last_updated": "2026-01-25"
+}

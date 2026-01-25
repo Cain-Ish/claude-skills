@@ -20,24 +20,42 @@ Analyzes fix approval metrics, adjusts rule confidence, and discovers new patter
 
 Analyzes self-debugger effectiveness and adjusts rule confidence:
 
-1. **Load metrics** from `~/.claude/self-debugger/metrics.jsonl`
-2. **Calculate health score** (0-100) based on:
+**IMPORTANT**: This command MUST be run from the claude-skills repository root directory.
+
+1. **Check directory** - Verify you're in claude-skills repo:
+   ```bash
+   if [[ ! -d "plugins/self-debugger" ]]; then
+     echo "Error: Must run /self-improve from claude-skills repository root"
+     echo "Current directory: $(pwd)"
+     echo "Looking for: plugins/self-debugger/"
+     exit 1
+   fi
+   ```
+2. **Load metrics** from `~/.claude/self-debugger/metrics.jsonl`
+3. **Calculate health score** (0-100) based on:
    - Issue resolution rate
    - False positive rate (issues pending > 7 days)
    - Fix approval rate
-3. **Analyze each rule**:
+4. **Analyze each rule**:
    - Count total detections
    - Count applied fixes
    - Calculate approval rate
-4. **Adjust confidence**:
+5. **Adjust confidence**:
    - High approval (≥90%): +0.05 confidence
    - Low approval (≤30%): -0.10 confidence
    - Medium approval: -0.02 confidence
-5. **Create feature branch** with rule updates
-6. **Commit and push** for review
+6. **Create feature branch** with rule updates
+7. **Commit and push** for review
 
 Execute:
 ```bash
+# First check we're in the right directory
+if [[ ! -d "plugins/self-debugger" ]]; then
+  echo "Error: Must run /self-improve from claude-skills repository root"
+  echo "Please navigate to claude-skills directory first"
+  exit 1
+fi
+
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 "$PLUGIN_ROOT/scripts/self-improve.sh"
 ```
@@ -58,17 +76,27 @@ Next step: Review MR and merge to main
 
 Discovers new patterns and best practices from the web:
 
-1. **Search for Claude Code best practices** (current year)
-2. **Fetch official documentation** updates
-3. **Extract code patterns** from examples
-4. **Generate external rules** with confidence scores:
+**IMPORTANT**: This command MUST be run from the claude-skills repository root directory.
+
+1. **Check directory** - Verify you're in claude-skills repo
+2. **Search for Claude Code best practices** (current year)
+3. **Fetch official documentation** updates
+4. **Extract code patterns** from examples
+5. **Generate external rules** with confidence scores:
    - Official sources (docs.anthropic.com): 0.8 confidence
    - Community sources (GitHub): 0.6 confidence
    - With code examples: +0.1 confidence
-5. **Store in `rules/external/`** for validation
+6. **Store in `rules/external/`** for validation
 
 Execute:
 ```bash
+# First check we're in the right directory
+if [[ ! -d "plugins/self-debugger" ]]; then
+  echo "Error: Must run /self-improve web from claude-skills repository root"
+  echo "Please navigate to claude-skills directory first"
+  exit 1
+fi
+
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 "$PLUGIN_ROOT/scripts/web-discover.sh"
 ```
@@ -98,6 +126,11 @@ External rules: 1
 - After major Claude Code releases
 - When creating new plugin types
 - To validate existing rules against official docs
+
+**Cleanup behavior**:
+- Automatic cleanup runs when session ends (Stop hook)
+- **IMPORTANT**: AI should proactively call `/cleanup` after completing major tasks to prevent orphaned processes
+- Cleanup removes stale Claude Code processes from previous sessions
 
 ## Requirements
 
@@ -145,7 +178,9 @@ git diff plugins/self-debugger/rules/core/
 
 ## Notes
 
+- **Directory requirement**: Must run from claude-skills repository root (checks for `plugins/self-debugger/`)
 - Self-improvement runs safely in source repository only
 - Web discovery requires internet and WebSearch tool
 - All changes require MR review before merge
 - Health score formula: resolution_rate - false_positive_rate
+- **Automatic cleanup**: Stop hook calls `/cleanup` to remove orphaned processes when session ends

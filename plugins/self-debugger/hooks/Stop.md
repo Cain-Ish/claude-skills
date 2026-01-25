@@ -4,13 +4,20 @@ event: Stop
 
 # Self-Debugger: Session Stop Hook
 
-Gracefully shut down the background monitor when the session ends.
+Gracefully shut down the background monitor when the session ends and clean up orphaned processes.
 
 ## Cleanup Steps
 
 Run the following cleanup steps (use defensive `|| true` to prevent hook failures):
 
 ```bash
+# Step 1: Clean up orphaned Claude Code processes via process-janitor
+echo "Self-debugger: Cleaning up orphaned processes..."
+if command -v claude >/dev/null 2>&1; then
+  claude /cleanup 2>/dev/null || true
+fi
+
+# Step 2: Clean up self-debugger monitor
 DEBUGGER_HOME="$HOME/.claude/self-debugger"
 GLOBAL_MONITOR_PID="$DEBUGGER_HOME/monitor.pid"
 GLOBAL_MONITOR_SESSION="$DEBUGGER_HOME/monitor-session.id"
