@@ -86,6 +86,30 @@
         "agent-routing"
       ],
       "category": "development"
+    },
+    {
+      "name": "automation-hub",
+      "source": "./plugins/automation-hub",
+      "version": "1.16.0",
+      "description": "Self-improving automation orchestrator with cross-plugin optimization, automatic recovery, MAR debate, and adaptive routing. Coordinates multi-agent, reflect, self-debugger, and process-janitor automatically through hooks. Based on 37 research papers (2025-2026) covering MAR, three-type memory, exponential backoff, circuit breakers, and adaptive routing.",
+      "author": {
+        "name": "Claude Code Community"
+      },
+      "repository": "https://github.com/Cain-Ish/claude-skills",
+      "license": "MIT",
+      "keywords": [
+        "automation",
+        "orchestration",
+        "multi-agent",
+        "routing",
+        "adaptive-learning",
+        "workflow",
+        "process-management",
+        "reflection",
+        "self-improvement",
+        "developer-productivity"
+      ],
+      "category": "orchestration"
     }
   ]
 }
