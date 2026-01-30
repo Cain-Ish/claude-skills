@@ -70,5 +70,22 @@ if [[ -x "$AUTO_COMMIT_SCRIPT" ]]; then
   done
 fi
 
+# 6. Run process janitor for cleanup (optional)
+JANITOR_SCRIPT="${PLUGIN_DIR}/scripts/optimization/process-janitor.sh"
+if [[ -x "$JANITOR_SCRIPT" ]]; then
+  # Only run if enabled in config
+  RUN_JANITOR=$(jq -r '.cleanup.run_on_session_end // true' "${PLUGIN_DIR}/config/auto-commit-config.json" 2>/dev/null || echo "true")
+
+  if [[ "$RUN_JANITOR" == "true" ]]; then
+    update_context "🧹 Running cleanup..."
+    CLEANUP_OUTPUT=$("$JANITOR_SCRIPT" 2>&1 || true)
+    CLEANUP_COUNT=$(echo "$CLEANUP_OUTPUT" | grep "Items cleaned:" | awk '{print $3}' || echo "0")
+
+    if [[ "$CLEANUP_COUNT" != "0" ]]; then
+      update_context "✅ Cleaned up $CLEANUP_COUNT items"
+    fi
+  fi
+fi
+
 echo "$OUTPUT_JSON"
 exit 0

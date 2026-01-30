@@ -20,5 +20,24 @@
       "create_backup_branch": false,
       "require_clean_working_tree": false
     }
+  },
+  "cleanup": {
+    "enabled": true,
+    "description": "Automatically clean up stale resources",
+    "run_on_session_end": true,
+    "aggressive": false,
+    "retention": {
+      "session_files_days": 30,
+      "log_file_max_mb": 100,
+      "backup_files_days": 7,
+      "task_outputs_days": 1
+    }
+  },
+  "resource_monitoring": {
+    "enabled": true,
+    "description": "Monitor system resources before spawning agents",
+    "max_cpu_percent": 80,
+    "max_memory_percent": 85,
+    "max_concurrent_agents": 5
   }
 }
