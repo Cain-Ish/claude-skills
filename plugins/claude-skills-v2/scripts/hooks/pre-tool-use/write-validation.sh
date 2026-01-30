@@ -70,6 +70,11 @@ if [[ "$FILENAME" == ".env" ]] || [[ "$FILENAME" == .env.* ]]; then
   fi
 fi
 
+# Block: Creating docs/ directory or files within it
+if [[ "$FILE_PATH" =~ ^docs/ ]] || [[ "$FILE_PATH" =~ /docs/ ]]; then
+  block_write "Attempting to create file in docs/ directory. Plugin philosophy: Documentation belongs IN the code (commands, agents, comments), not separate .md files. Use commands/*.md for user docs, comments in scripts for technical docs."
+fi
+
 # Warn: Creating new README or documentation files (often unnecessary)
 if [[ "$FILENAME" =~ ^README.*\.md$ ]] || [[ "$FILENAME" =~ ^CONTRIBUTING\.md$ ]] || [[ "$FILENAME" =~ ^CHANGELOG\.md$ ]]; then
   # Check if file already exists

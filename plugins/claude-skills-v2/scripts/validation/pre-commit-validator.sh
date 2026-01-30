@@ -3,6 +3,38 @@ set -euo pipefail
 
 # Pre-commit Validator for claude-skills-v2 plugin
 # Validates plugin structure before commits to catch issues early
+#
+# ARCHITECTURE: Self-Improvement System
+# =====================================
+# This plugin implements a comprehensive self-improvement architecture across 3 phases:
+#
+# Phase 1: Prevention (Validation)
+#   - pre-commit-validator.sh (this script): Validates plugin structure before commits
+#   - script-checker.sh: Detects missing hook scripts
+#   - Hook templates: Templates for generating missing scripts
+#   - 4 new hooks: context-tracker, write-validation, edit-validation, bash-feedback
+#
+# Phase 2: Detection (Diagnostics)
+#   - plugin-diagnostician agent: Auto-diagnoses errors with root cause analysis
+#   - /validate-plugin command: User-triggered validation with filtering
+#   - /save-plugin command: Manual auto-commit trigger
+#
+# Phase 3: Remediation (Auto-Fix)
+#   - auto-fixer.sh: Applies fixes with confidence-based approval (0.0-1.0)
+#   - /fix-plugin command: Interactive fixing wizard
+#   - Auto-commit system: Prevents data loss during development
+#
+# Documentation Philosophy:
+#   - All docs are IN the code (this comment, command files, agent frontmatter)
+#   - NO separate docs/ folder (violates "no unnecessary .md files" principle)
+#   - Commands (commands/*.md) serve as user documentation
+#   - Code comments serve as architecture/technical documentation
+#
+# For more details, see:
+#   - commands/validate-plugin.md - Validation usage
+#   - commands/fix-plugin.md - Auto-fix usage
+#   - commands/save-plugin.md - Auto-commit usage
+#   - agents/diagnostics/plugin-diagnostician.md - Diagnostic agent spec
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_JSON="${PLUGIN_DIR}/.claude-plugin/plugin.json"
@@ -295,6 +327,28 @@ if [[ -f "$CONFIG_JSON" ]]; then
   else
     pass
   fi
+fi
+
+# ============================================================
+# 5. Check for unnecessary documentation
+# ============================================================
+echo "📝 Checking for unnecessary documentation..."
+
+# Check for docs/ directory (violates plugin philosophy)
+if [[ -d "${PLUGIN_DIR}/docs" ]]; then
+  error "docs/ directory exists - violates plugin philosophy. Documentation should be IN the code (commands, agents, comments), not separate .md files" "docs/"
+else
+  pass
+fi
+
+# Check for unnecessary root-level .md files
+UNNECESSARY_MD_FILES=$(find "$PLUGIN_DIR" -maxdepth 1 -name "*.md" -not -name "CLAUDE.md" 2>/dev/null || echo "")
+if [[ -n "$UNNECESSARY_MD_FILES" ]]; then
+  while IFS= read -r md_file; do
+    if [[ -z "$md_file" ]]; then continue; fi
+    FILENAME=$(basename "$md_file")
+    warning "Unnecessary .md file in root: $FILENAME (documentation should be in commands/ or code comments)" "$FILENAME"
+  done <<< "$UNNECESSARY_MD_FILES"
 fi
 
 # ============================================================
