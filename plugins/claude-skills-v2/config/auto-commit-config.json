@@ -1,0 +1,24 @@
+{
+  "auto_commit": {
+    "enabled": true,
+    "description": "Automatically commit plugin changes during development",
+    "min_interval_seconds": 300,
+    "auto_push": false,
+    "trigger_events": {
+      "session_end": true,
+      "manual": true,
+      "stop_command": true
+    },
+    "commit_message_template": "🤖 Auto-commit: Plugin development checkpoint\n\nAuto-committed at: {timestamp}\nChanged files: {file_count}\nTrigger: {trigger_event}\n\n---\nThis is an automatic commit to prevent data loss during plugin development.",
+    "validation": {
+      "run_before_commit": true,
+      "block_on_critical_errors": false,
+      "warn_on_validation_failure": true
+    },
+    "safety": {
+      "max_commits_per_hour": 12,
+      "create_backup_branch": false,
+      "require_clean_working_tree": false
+    }
+  }
+}

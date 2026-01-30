@@ -15,6 +15,7 @@
     "./agents/orchestration/task-analyzer.md",
     "./agents/code-quality/code-reviewer.md",
     "./agents/code-quality/security-auditor.md",
-    "./agents/learning/observer.md"
+    "./agents/learning/observer.md",
+    "./agents/diagnostics/plugin-diagnostician.md"
   ]
 }

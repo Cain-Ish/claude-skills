@@ -61,5 +61,14 @@ jq -n \
 
 update_context "✨ Session finalized"
 
+# 5. Trigger auto-commit if enabled (plugin development safety)
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+AUTO_COMMIT_SCRIPT="${PLUGIN_DIR}/scripts/hooks/auto-commit.sh"
+if [[ -x "$AUTO_COMMIT_SCRIPT" ]]; then
+  AUTO_COMMIT_ENABLED=true "$AUTO_COMMIT_SCRIPT" 2>&1 | while read -r line; do
+    update_context "$line"
+  done
+fi
+
 echo "$OUTPUT_JSON"
 exit 0
