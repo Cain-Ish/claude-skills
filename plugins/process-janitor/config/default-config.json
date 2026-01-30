@@ -1,9 +1,0 @@
-{
-  "auto_cleanup_on_start": false,
-  "min_session_age_minutes": 10,
-  "heartbeat_interval_seconds": 60,
-  "stale_heartbeat_threshold_minutes": 5,
-  "cleanup_mode": "interactive",
-  "notification_enabled": true,
-  "dry_run_default": true
-}

@@ -4,110 +4,31 @@
     "name": "Cain-Ish"
   },
   "metadata": {
-    "description": "Collection of Claude Code plugins for enhanced AI-assisted development",
-    "version": "1.0.0"
+    "description": "Autonomous Claude Code plugin with intelligent orchestration, continuous learning, and self-optimization. Prevents mistakes, auto-improves code, learns patterns, and leverages all Claude capabilities.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
-      "name": "reflect",
-      "source": "./plugins/reflect",
-      "version": "1.0.0",
-      "description": "Self-improvement system for Claude Code skills. Analyzes sessions for improvement signals, proposes skill enhancements, validates via critic agent, and tracks effectiveness metrics. Self-optimizes proposal quality via self-debugger.",
+      "name": "claude-skills-v2",
+      "source": "./plugins/claude-skills-v2",
+      "version": "2.0.0",
+      "description": "Unified autonomous plugin: PreToolUse validation, PostToolUse auto-formatting, continuous learning with confidence scoring, super-orchestrator leveraging all Claude capabilities (agents, skills, plugins, web search, MCP). Self-maintaining with zero documentation.",
       "author": {
         "name": "Claude Skills Contributors"
       },
       "repository": "https://github.com/Cain-Ish/claude-skills",
       "license": "MIT",
       "keywords": [
-        "self-improvement",
+        "autonomous",
+        "hooks",
         "learning",
-        "skills",
-        "metrics",
-        "reflection"
-      ],
-      "category": "development"
-    },
-    {
-      "name": "process-janitor",
-      "source": "./plugins/process-janitor",
-      "version": "1.0.0",
-      "description": "Safely detect and clean up leftover processes when multiple Claude Code instances are running. Multi-layer safety checks prevent false positives.",
-      "author": {
-        "name": "Claude Skills Contributors"
-      },
-      "repository": "https://github.com/Cain-Ish/claude-skills",
-      "license": "MIT",
-      "keywords": [
-        "process-management",
-        "cleanup",
-        "multi-instance",
-        "maintenance",
-        "heartbeat"
-      ],
-      "category": "development"
-    },
-    {
-      "name": "self-debugger",
-      "source": "./plugins/self-debugger",
-      "version": "1.0.0",
-      "description": "Meta-plugin that monitors, debugs, and improves all plugins by detecting issues, generating fixes, and committing them to feature branches. Optimizes other plugins (multi-agent, reflect) through the Plugin Composition Pattern. Auto-discovers patterns via web search and continuously self-improves.",
-      "author": {
-        "name": "Claude Skills Contributors"
-      },
-      "repository": "https://github.com/Cain-Ish/claude-skills",
-      "license": "MIT",
-      "keywords": [
-        "debugging",
-        "meta-plugin",
-        "self-improvement",
+        "orchestration",
+        "auto-format",
+        "security",
         "validation",
-        "code-quality",
-        "plugin-development",
-        "cross-plugin-optimization"
-      ],
-      "category": "development"
-    },
-    {
-      "name": "multi-agent",
-      "source": "./plugins/multi-agent",
-      "version": "1.0.0",
-      "description": "Intelligent orchestration system that analyzes task complexity and automatically coordinates single or multiple agents with transparent cost-benefit analysis. Uses research-proven patterns (sequential, parallel, hierarchical) to achieve 90% better results on complex tasks. Self-calibrates thresholds via self-debugger.",
-      "author": {
-        "name": "Claude Skills Contributors"
-      },
-      "repository": "https://github.com/Cain-Ish/claude-skills",
-      "license": "MIT",
-      "keywords": [
-        "orchestration",
-        "multi-agent",
-        "coordination",
-        "complexity-analysis",
-        "cost-optimization",
-        "agent-routing"
-      ],
-      "category": "development"
-    },
-    {
-      "name": "automation-hub",
-      "source": "./plugins/automation-hub",
-      "version": "1.16.0",
-      "description": "Self-improving automation orchestrator with cross-plugin optimization, automatic recovery, MAR debate, and adaptive routing. Coordinates multi-agent, reflect, self-debugger, and process-janitor automatically through hooks. Based on 37 research papers (2025-2026) covering MAR, three-type memory, exponential backoff, circuit breakers, and adaptive routing.",
-      "author": {
-        "name": "Claude Code Community"
-      },
-      "repository": "https://github.com/Cain-Ish/claude-skills",
-      "license": "MIT",
-      "keywords": [
-        "automation",
-        "orchestration",
-        "multi-agent",
-        "routing",
-        "adaptive-learning",
-        "workflow",
-        "process-management",
-        "reflection",
-        "self-improvement",
-        "developer-productivity"
+        "continuous-learning",
+        "pattern-detection",
+        "self-maintaining"
       ],
       "category": "orchestration"
     }

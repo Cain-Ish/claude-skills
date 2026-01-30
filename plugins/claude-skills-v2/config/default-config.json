@@ -1,0 +1,158 @@
+{
+  "version": "2.0.0",
+  "auto_invoke": {
+    "enabled": true,
+    "global_rate_limit": {
+      "max_per_hour": 10,
+      "min_interval_seconds": 300
+    },
+    "agents": {
+      "code-reviewer": {
+        "enabled": true,
+        "confidence_threshold": 0.7,
+        "max_per_hour": 10,
+        "min_interval_seconds": 300
+      },
+      "security-auditor": {
+        "enabled": true,
+        "confidence_threshold": 0.8,
+        "max_per_hour": 5,
+        "min_interval_seconds": 600
+      },
+      "task-analyzer": {
+        "enabled": true,
+        "confidence_threshold": 0.6,
+        "max_per_hour": 15,
+        "min_interval_seconds": 180
+      },
+      "refactor-advisor": {
+        "enabled": false,
+        "confidence_threshold": 0.75,
+        "max_per_hour": 5,
+        "min_interval_seconds": 600
+      }
+    }
+  },
+  "hooks": {
+    "PreToolUse": {
+      "enabled": true,
+      "timeout": 5,
+      "max_parallel": 5
+    },
+    "PostToolUse": {
+      "enabled": true,
+      "timeout": 30,
+      "async": true,
+      "max_parallel": 10
+    },
+    "SessionStart": {
+      "enabled": true,
+      "timeout": 10
+    },
+    "Stop": {
+      "enabled": true,
+      "timeout": 30
+    },
+    "PreCompact": {
+      "enabled": true,
+      "timeout": 10
+    },
+    "SessionEnd": {
+      "enabled": true,
+      "timeout": 15
+    }
+  },
+  "learning": {
+    "enabled": true,
+    "observation": {
+      "capture_prompts": true,
+      "capture_tool_calls": true,
+      "capture_corrections": true,
+      "capture_errors": true
+    },
+    "pattern_detection": {
+      "enabled": true,
+      "interval_seconds": 300,
+      "min_observations": 3,
+      "confidence_boost": {
+        "user_correction": 0.2,
+        "error_resolution": 0.15,
+        "repeated_pattern": 0.1,
+        "explicit_preference": 0.3
+      }
+    },
+    "instincts": {
+      "min_confidence": 0.3,
+      "auto_apply_threshold": 0.7,
+      "decay_rate_per_week": 0.05,
+      "archive_threshold": 0.25,
+      "max_instincts": 100
+    },
+    "evolution": {
+      "enabled": true,
+      "auto_evolve": false,
+      "min_cluster_size": 3,
+      "min_confidence": 0.6,
+      "require_user_approval": true
+    }
+  },
+  "optimization": {
+    "enabled": true,
+    "monitor_interval_seconds": 300,
+    "validation_rules": {
+      "schema_validation": true,
+      "hook_verification": true,
+      "agent_tool_scoping": true,
+      "command_checks": true
+    },
+    "auto_fix": {
+      "enabled": true,
+      "min_critic_score": 70,
+      "create_git_commits": true,
+      "require_approval": false,
+      "branch_prefix": "auto-fix"
+    },
+    "adaptive_thresholds": {
+      "enabled": true,
+      "learning_rate": 0.1,
+      "target_approval_rate": 0.75,
+      "min_threshold": 0.5,
+      "max_threshold": 0.9
+    }
+  },
+  "safety": {
+    "circuit_breaker": {
+      "enabled": true,
+      "failure_threshold": 3,
+      "reset_timeout_seconds": 3600,
+      "half_open_max_calls": 1
+    },
+    "approval_gates": {
+      "first_time_approval": true,
+      "first_time_count": 3,
+      "high_cost_approval": true,
+      "high_cost_threshold": 50000,
+      "destructive_approval": true
+    },
+    "rate_limiting": {
+      "enabled": true,
+      "use_token_bucket": true,
+      "bucket_size": 10,
+      "refill_rate_per_hour": 10
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "jsonl",
+    "console_output": false,
+    "file_output": true,
+    "max_file_size_mb": 100,
+    "retention_days": 30
+  },
+  "performance": {
+    "max_concurrent_agents": 5,
+    "max_concurrent_hooks": 10,
+    "hook_timeout_buffer_ms": 100,
+    "agent_timeout_buffer_ms": 1000
+  }
+}

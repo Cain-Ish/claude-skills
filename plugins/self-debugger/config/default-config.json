@@ -1,8 +1,0 @@
-{
-  "scan_interval_seconds": 300,
-  "min_critic_score": 70,
-  "max_fixes_per_session": 10,
-  "stale_lock_threshold_minutes": 30,
-  "auto_web_discovery": false,
-  "heartbeat_interval_seconds": 60
-}

@@ -1,0 +1,150 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/pre-tool-use/context-tracker.sh",
+          "timeout": 2,
+          "description": "Track tool usage for learning engine"
+        }
+      ]
+    },
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/pre-tool-use/bash-validation.sh",
+          "timeout": 5,
+          "description": "Validate bash commands before execution"
+        }
+      ]
+    },
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/pre-tool-use/write-validation.sh",
+          "timeout": 3,
+          "description": "Validate file writes (prevent .env, unnecessary .md)"
+        }
+      ]
+    },
+    {
+      "matcher": "Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/pre-tool-use/edit-validation.sh",
+          "timeout": 3,
+          "description": "Validate file edits (prevent secrets, sensitive files)"
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/post-tool-use/observation-logger.sh",
+          "async": true,
+          "timeout": 5,
+          "description": "Log tool execution for learning engine"
+        }
+      ]
+    },
+    {
+      "matcher": "Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/post-tool-use/auto-format.sh",
+          "async": true,
+          "timeout": 30,
+          "description": "Auto-format code files after editing"
+        }
+      ]
+    },
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/post-tool-use/auto-format.sh",
+          "async": true,
+          "timeout": 30,
+          "description": "Auto-format code files after writing"
+        }
+      ]
+    },
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/post-tool-use/bash-feedback.sh",
+          "async": true,
+          "timeout": 10,
+          "description": "Provide feedback on bash command execution"
+        }
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/session-start.sh",
+          "timeout": 10,
+          "description": "Initialize session: load context, detect PM, start learning engine"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/stop.sh",
+          "timeout": 30,
+          "description": "Extract patterns, trigger cleanup, suggest reflection"
+        }
+      ]
+    }
+  ],
+  "PreCompact": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/pre-compact.sh",
+          "timeout": 10,
+          "description": "Save state before context compaction"
+        }
+      ]
+    }
+  ],
+  "SessionEnd": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/hooks/session-end.sh",
+          "timeout": 15,
+          "description": "Final state save and session evaluation"
+        }
+      ]
+    }
+  ]
+}

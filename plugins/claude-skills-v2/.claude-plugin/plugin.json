@@ -1,0 +1,20 @@
+{
+  "name": "claude-skills",
+  "version": "2.0.0",
+  "description": "Unified autonomous plugin with intelligent orchestration, continuous learning, and meta-optimization. Supports users proactively without manual intervention through hooks, auto-invoked agents, and pattern-based skill evolution.",
+  "author": "Claude Skills Team",
+  "license": "MIT",
+  "minClaudeCodeVersion": "2.1.0",
+  "skills": [
+    "./skills/",
+    "./commands/"
+  ],
+  "agents": [
+    "./agents/orchestration/super-orchestrator.md",
+    "./agents/orchestration/task-analyzer.md",
+    "./agents/code-quality/code-reviewer.md",
+    "./agents/code-quality/security-auditor.md",
+    "./agents/learning/observer.md"
+  ],
+  "rules": []
+}
