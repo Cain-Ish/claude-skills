@@ -49,6 +49,32 @@ Files:
 - scripts/hooks/auto-commit.sh - Auto-commit for data protection
 - config/auto-commit-config.json - Auto-commit configuration
 
+Operational Helpers ✅
+----------------------
+Runtime management and resource optimization
+
+Multi-Agent Orchestration:
+- scripts/orchestration/multi-agent-advisor.sh - Recommends parallel/sequential execution
+  * Analyzes task keywords for parallelization potential
+  * Returns agent list and execution mode
+  * Example: "review and test" → parallel, code-reviewer + test-automator
+
+Resource Management:
+- scripts/optimization/resource-monitor.sh - Monitors system resources
+  * Checks CPU/memory/concurrent agents
+  * Returns resources_available boolean
+  * Recommends max agents to spawn
+  * Prevents system overload
+
+Process Cleanup:
+- scripts/optimization/process-janitor.sh - Cleans stale resources
+  * Removes old sessions (>30 days)
+  * Truncates large logs (>100MB)
+  * Cleans validation backups (>7 days)
+  * Reports disk usage
+  * Auto-runs on SessionEnd
+- commands/cleanup.md - User cleanup command
+
 VALIDATION CHECKS (32 total)
 =============================
 
@@ -113,12 +139,13 @@ SAFETY FEATURES
 STATS
 =====
 
-Files Created:     20 files
-Lines of Code:     ~2,000 lines (excluding removed docs)
+Files Created:     26 files (20 core + 6 operational)
+Lines of Code:     ~3,000 lines (excluding removed docs)
 Validation Checks: 32 checks
 Hook Scripts:      12/12 exist
 Fix Types:         5 types
-Git Commits:       4 commits
+Operational:       3 helpers (orchestration, monitor, janitor)
+Git Commits:       6 commits
 GitHub Status:     ✅ Pushed to master
 
 TESTING
