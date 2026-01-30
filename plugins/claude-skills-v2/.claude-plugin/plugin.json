@@ -7,9 +7,9 @@
   },
   "license": "MIT",
   "skills": [
-    "./skills/",
     "./commands/"
   ],
+  "hooks": "./hooks/hooks.json",
   "agents": [
     "./agents/orchestration/super-orchestrator.md",
     "./agents/orchestration/task-analyzer.md",
